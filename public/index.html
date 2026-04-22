@@ -5,207 +5,36 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>ENADE Checklist</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0f1117;
-  --surface:#181c27;
-  --surface2:#1e2333;
-  --border:#2a3045;
-  --border2:#333d58;
-  --text:#e8ecf4;
-  --muted:#6b7590;
-  --accent:#7c6ef5;
-  --accent2:#a594ff;
-  --success:#22d992;
-  --warn:#f59e42;
-  --danger:#f56565;
-  --radius:18px;
-  --shadow:0 8px 32px rgba(0,0,0,.45);
-}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
-
-/* ── LOADER ── */
-#loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;transition:opacity .4s}
-#loader.hide{opacity:0;pointer-events:none}
-.spin{width:38px;height:38px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── SCREENS ── */
-.screen{display:none;animation:fadeUp .35s ease both}
-.screen.active{display:block}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── AUTH ── */
-#auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(124,110,245,.13),transparent)}
-#auth-screen.active{display:flex}
-.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:38px 32px;width:100%;max-width:420px;box-shadow:var(--shadow)}
-.auth-logo{display:inline-flex;align-items:center;gap:8px;padding:5px 13px;border-radius:999px;background:rgba(124,110,245,.15);color:var(--accent2);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:22px}
-.auth-title{font-size:28px;font-weight:800;letter-spacing:-.04em;margin-bottom:6px}
-.auth-sub{font-size:13px;color:var(--muted);margin-bottom:28px}
-.tabs{display:flex;background:var(--surface2);border-radius:12px;padding:4px;margin-bottom:24px;gap:4px}
-.tab{flex:1;padding:9px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .18s}
-.tab.on{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
-.field input{width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .18s}
-.field input:focus{border-color:var(--accent)}
-.field input::placeholder{color:var(--muted)}
-.err-box{padding:11px 14px;border-radius:11px;background:rgba(245,101,101,.1);border:1px solid rgba(245,101,101,.25);color:#f99;font-size:13px;margin-bottom:14px}
-.btn-primary{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:transform .15s,opacity .15s;letter-spacing:.01em}
-.btn-primary:hover{transform:translateY(-1px);opacity:.92}
-.btn-primary:active{transform:translateY(0)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-
-
-
-/* ── APP LAYOUT ── */
-#app-screen{min-height:100vh}
-.topnav{position:sticky;top:0;z-index:50;background:rgba(15,17,23,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:14px;height:58px}
-.nav-brand{font-size:15px;font-weight:800;letter-spacing:-.02em;flex:1}
-.nav-brand span{color:var(--accent2)}
-.nav-user{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.nav-btn{padding:7px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
-.nav-btn:hover{border-color:var(--border2);background:var(--surface)}
-.nav-btn.admin{border-color:rgba(124,110,245,.4);color:var(--accent2);background:rgba(124,110,245,.1)}
-.nav-btn.admin:hover{background:rgba(124,110,245,.18)}
-
-/* ── VIEWS ── */
-.view{display:none}
-.view.active{display:block}
-
-/* ── CHECKLIST VIEW ── */
-.wrap{max-width:860px;margin:0 auto;padding:28px 16px 48px}
-.hero{margin-bottom:22px;padding:26px 24px;border-radius:22px;background:linear-gradient(135deg,rgba(124,110,245,.12),rgba(124,110,245,.04));border:1px solid rgba(124,110,245,.2);position:relative;overflow:hidden}
-.hero::before{content:"";position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(124,110,245,.2),transparent 70%);pointer-events:none}
-.hero-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;background:rgba(124,110,245,.2);color:var(--accent2);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
-.hero h1{font-size:clamp(20px,3vw,30px);font-weight:800;letter-spacing:-.04em;margin-bottom:6px}
-.hero p{font-size:13px;color:var(--muted)}
-
-.prog-bar-wrap{margin-bottom:20px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:16px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
-.prog-nums{font-size:13px;font-weight:800;color:var(--text);font-family:'DM Mono',monospace;white-space:nowrap;min-width:58px}
-.prog-track{flex:1;height:10px;background:var(--border);border-radius:999px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:999px;transition:width .4s ease;box-shadow:0 0 12px rgba(124,110,245,.4)}
-.prog-pct{font-size:12px;font-weight:800;color:var(--accent2);font-family:'DM Mono',monospace;min-width:36px;text-align:right}
-.reset-btn{padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
-.reset-btn:hover{border-color:var(--border2);color:var(--text)}
-
-.section{margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
-.section:hover{border-color:var(--border2)}
-.sec-head{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--border)}
-.cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.sec-title{font-size:14px;font-weight:800;flex:1;letter-spacing:-.01em}
-.prio-badge{font-size:10px;font-weight:800;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
-.sec-count{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);min-width:44px;text-align:right;font-weight:700}
-
-.items{padding:8px}
-.item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;transition:background .15s,transform .15s;border:1px solid transparent;margin:4px 2px}
-.item:hover{background:var(--surface2);transform:translateY(-1px);border-color:var(--border)}
-.item.done{opacity:.7}
-.item.done .item-text{text-decoration:line-through;color:var(--muted)}
-.cb{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;background:var(--surface2);transition:all .18s}
-.cb.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 4px 12px rgba(124,110,245,.35)}
-.item-text{font-size:13px;line-height:1.55;color:var(--text)}
-
-/* ── ADMIN VIEW ── */
-.admin-wrap{max-width:900px;margin:0 auto;padding:28px 16px 48px}
-.admin-header{margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.admin-header h2{font-size:22px;font-weight:800;letter-spacing:-.03em}
-.admin-header p{font-size:13px;color:var(--muted);margin-top:2px}
-.save-btn{padding:10px 20px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:transform .15s,opacity .15s}
-.save-btn:hover{transform:translateY(-1px);opacity:.9}
-.save-btn.saved{background:linear-gradient(135deg,#1ab97a,var(--success))}
-
-.add-cat-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;display:flex;gap:10px;align-items:center}
-.add-cat-box input{flex:1;padding:10px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .18s}
-.add-cat-box input:focus{border-color:var(--accent)}
-.add-cat-box input::placeholder{color:var(--muted)}
-.add-cat-btn{padding:10px 16px;border-radius:10px;border:none;background:rgba(124,110,245,.2);color:var(--accent2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:background .15s;white-space:nowrap}
-.add-cat-btn:hover{background:rgba(124,110,245,.3)}
-
-.admin-sec{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-bottom:12px;overflow:hidden}
-.admin-sec-head{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
-.admin-sec-head:hover{background:var(--surface2)}
-.admin-sec-title{font-size:14px;font-weight:800;flex:1}
-.admin-sec-body{padding:12px;display:none}
-.admin-sec-body.open{display:block}
-.admin-item-row{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:10px;background:var(--surface2);margin-bottom:7px;border:1px solid var(--border)}
-.admin-item-txt{flex:1;font-size:12.5px;line-height:1.5;color:var(--text)}
-.icon-btn{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
-.icon-btn.edit{background:rgba(124,110,245,.15);color:var(--accent2)}
-.icon-btn.edit:hover{background:rgba(124,110,245,.28)}
-.icon-btn.del{background:rgba(245,101,101,.12);color:#f87171}
-.icon-btn.del:hover{background:rgba(245,101,101,.22)}
-.add-item-row{display:flex;gap:8px;margin-top:10px}
-.add-item-row input{flex:1;padding:9px 12px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .18s}
-.add-item-row input:focus{border-color:var(--accent)}
-.add-item-row input::placeholder{color:var(--muted)}
-.add-item-row button{padding:9px 14px;border-radius:9px;border:none;background:rgba(34,217,146,.15);color:var(--success);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:background .15s}
-.add-item-row button:hover{background:rgba(34,217,146,.25)}
-.prio-select{padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;margin-left:auto}
-
-/* ── ADMIN USERS VIEW ── */
-.users-wrap{max-width:700px;margin:0 auto;padding:28px 16px 48px}
-.user-row{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--surface);border:1px solid var(--border);border-radius:13px;margin-bottom:9px}
-.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
-.user-email{font-size:13px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.user-role{font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;text-transform:uppercase;letter-spacing:.06em}
-.user-role.admin{background:rgba(124,110,245,.15);color:var(--accent2)}
-.user-role.student{background:rgba(107,117,144,.12);color:var(--muted)}
-.user-prog{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:11px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:200;transition:transform .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:nowrap}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.toast.ok{border-color:rgba(34,217,146,.35);color:var(--success)}
-
-@media(max-width:600px){
-  .topnav{padding:0 14px;gap:10px}
-  .wrap,.admin-wrap,.users-wrap{padding:18px 10px 36px}
-  .auth-card{padding:28px 20px}
-  .auth-title{font-size:23px}
-}
-</style>
+<link rel="stylesheet" href="./css/styles.css"/>
 </head>
 <body>
-
-<!-- LOADER -->
 <div id="loader"><div class="spin"></div></div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-<!-- AUTH SCREEN -->
 <div id="auth-screen" class="screen">
   <div class="auth-card">
     <div class="auth-logo">ENADE • Revisão</div>
     <h1 class="auth-title">Checklist</h1>
     <p class="auth-sub">Entre para acompanhar seu progresso.</p>
     <div class="tabs">
-      <button class="tab on" id="tab-login" onclick="switchTab('login')">Entrar</button>
-      <button class="tab" id="tab-reg" onclick="switchTab('register')">Criar conta</button>
+      <button class="tab on" id="tab-login">Entrar</button>
+      <button class="tab" id="tab-reg">Criar conta</button>
     </div>
     <div id="auth-err" class="err-box" style="display:none"></div>
     <div class="field"><label>Email</label><input type="email" id="inp-email" placeholder="voce@email.com"/></div>
     <div class="field"><label>Senha</label><input type="password" id="inp-pass" placeholder="••••••••"/></div>
     <div class="field" id="field-name" style="display:none"><label>Nome</label><input type="text" id="inp-name" placeholder="Seu nome"/></div>
-    <button class="btn-primary" id="auth-btn" onclick="doAuth()">Entrar</button>
+    <button class="btn-primary" id="auth-btn">Entrar</button>
   </div>
 </div>
-
-<!-- APP SCREEN -->
 <div id="app-screen" class="screen">
-  <!-- NAV -->
   <nav class="topnav">
     <span class="nav-brand">ENA<span>DE</span></span>
     <span class="nav-user" id="nav-user-email"></span>
-    <button class="nav-btn" id="nav-admin-btn" style="display:none" onclick="showView('admin')">⚙ Admin</button>
-    <button class="nav-btn" id="nav-users-btn" style="display:none" onclick="showView('users')">👥 Alunos</button>
-    <button class="nav-btn" id="nav-checklist-btn" onclick="showView('checklist')" style="display:none">← Checklist</button>
-    <button class="nav-btn" onclick="doLogout()">Sair</button>
+    <button class="nav-btn" id="nav-admin-btn" style="display:none">⚙ Admin</button>
+    <button class="nav-btn" id="nav-users-btn" style="display:none">👥 Alunos</button>
+    <button class="nav-btn" id="nav-checklist-btn" style="display:none">← Checklist</button>
+    <button class="nav-btn" id="logout-btn">Sair</button>
   </nav>
-
-  <!-- CHECKLIST VIEW -->
   <div id="view-checklist" class="view active">
     <div class="wrap">
       <div class="hero">
@@ -217,13 +46,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <span class="prog-nums" id="prog-nums">0 / 0</span>
         <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
         <span class="prog-pct" id="prog-pct">0%</span>
-        <button class="reset-btn" onclick="resetProgress()">Reiniciar</button>
+        <button class="reset-btn" id="reset-progress-btn">Reiniciar</button>
       </div>
       <div id="sections-container"></div>
     </div>
   </div>
-
-  <!-- ADMIN VIEW -->
   <div id="view-admin" class="view">
     <div class="admin-wrap">
       <div class="admin-header">
@@ -231,23 +58,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <h2>Painel Admin</h2>
           <p>Edite categorias e itens do checklist</p>
         </div>
-        <button class="save-btn" id="save-btn" onclick="saveCurriculum()">Salvar alterações</button>
+        <button class="save-btn" id="save-btn">Salvar alterações</button>
       </div>
       <div class="add-cat-box">
         <input id="new-cat-input" placeholder="Nome da nova categoria…"/>
-        <select id="new-cat-prio" style="padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
+        <select id="new-cat-prio" class="generic-select">
           <option>obrigatório</option>
           <option>importante</option>
           <option>revisar</option>
           <option>atenção máxima</option>
         </select>
-        <button class="add-cat-btn" onclick="addCategory()">+ Categoria</button>
+        <button class="add-cat-btn" id="add-cat-btn">+ Categoria</button>
       </div>
       <div id="admin-sections"></div>
     </div>
   </div>
-
-  <!-- USERS VIEW -->
   <div id="view-users" class="view">
     <div class="users-wrap">
       <div class="admin-header">
@@ -256,461 +81,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <p>Progresso de cada aluno no checklist</p>
         </div>
       </div>
-      <div id="users-list"><p style="color:var(--muted);font-size:13px">Carregando…</p></div>
+      <div id="users-list"><p class="muted-msg">Carregando…</p></div>
     </div>
   </div>
 </div>
-
-<!-- FIREBASE SDK -->
-<script type="module">
-  const ADMIN_EMAILS = ["admintop@admin.com"];
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile }
-  from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-// ── FIREBASE CONFIG ──────────────────────────────────────────────────────────
-const firebaseConfig = {
-  apiKey: "AIzaSyBMA-vCw5wFp1WaF_rj8508oZQHpT2rsxQ",
-  authDomain: "enadequestoes.firebaseapp.com",
-  projectId: "enadequestoes",
-  storageBucket: "enadequestoes.firebasestorage.app",
-  messagingSenderId: "541044453598",
-  appId: "1:541044453598:web:3fa61640e1527f0962524f"
-};
-
-/*
- * ESTRUTURA DO FIRESTORE:
- *
- * /curriculum (doc único)
- *   └─ sections: [ { cat, color, prio, items:[] } ]
- *
- * /users/{uid}
- *   └─ email, name, isAdmin, progress: { "0-0": true, "1-2": true, … }
- *
- * Lógica:
- * - onAuthStateChanged: dispara toda vez que o estado de login muda
- * - Admin é quem tem isAdmin:true no Firestore
- * - O primeiro usuário a se cadastrar vira admin automaticamente
- */
-
-const app    = initializeApp(firebaseConfig);
-const auth   = getAuth(app);
-const db     = getFirestore(app);
-
-// ── ESTADO GLOBAL ─────────────────────────────────────────────────────────────
-let currentUser   = null;   // objeto do Firebase Auth
-let userDoc       = null;   // dados do Firestore do usuário logado
-let curriculum    = [];     // array de seções do checklist
-let progress      = {};     // { "0-0": true, … }
-let adminSections = [];     // cópia editável para o admin
-window.adminSections = adminSections;
-
-// ── HELPERS UI ────────────────────────────────────────────────────────────────
-window.switchTab = (t) => {
-  const isLogin = t === 'login';
-  document.getElementById('tab-login').className = 'tab' + (isLogin ? ' on' : '');
-  document.getElementById('tab-reg').className   = 'tab' + (!isLogin ? ' on' : '');
-  document.getElementById('auth-btn').textContent = isLogin ? 'Entrar' : 'Criar conta';
-  document.getElementById('field-name').style.display = isLogin ? 'none' : 'block';
-  document.getElementById('auth-err').style.display = 'none';
-  document.getElementById('inp-email').value = '';
-  document.getElementById('inp-pass').value  = '';
-};
-
-function showErr(msg) {
-  const el = document.getElementById('auth-err');
-  el.textContent = msg; el.style.display = 'block';
-}
-
-function toast(msg, ok=false) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast show' + (ok ? ' ok' : '');
-  setTimeout(() => el.className = 'toast', 2600);
-}
-
-function loader(show) {
-  document.getElementById('loader').className = show ? '' : 'hide';
-}
-
-function showScreen(id) {
-  ['auth-screen','app-screen'].forEach(s => {
-    document.getElementById(s).className = 'screen' + (s===id ? ' active' : '');
-  });
-}
-
-window.showView = (v) => {
-  ['checklist','admin','users'].forEach(id => {
-    document.getElementById('view-'+id).className = 'view' + (id===v ? ' active' : '');
-  });
-  document.getElementById('nav-checklist-btn').style.display = v !== 'checklist' ? 'inline-flex' : 'none';
-  if (v === 'users') loadUsersView();
-  if (v === 'admin') renderAdmin();
-};
-
-// ── AUTH ──────────────────────────────────────────────────────────────────────
-window.doAuth = async () => {
-  const email  = document.getElementById('inp-email').value.trim();
-  const pass   = document.getElementById('inp-pass').value;
-  const name   = document.getElementById('inp-name').value.trim();
-  const isReg  = document.getElementById('tab-reg').classList.contains('on');
-  const btn    = document.getElementById('auth-btn');
-
-  if (!email || !pass) {
-    showErr('Preencha email e senha.');
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = '...';
-
-  try {
-    if (isReg) {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-
-      if (name) {
-        await updateProfile(cred.user, { displayName: name });
-      }
-
-      // 🔥 cria usuário padrão
-      await setDoc(doc(db, 'users', cred.user.uid), {
-        email,
-        name: name || email.split('@')[0],
-        isAdmin: false,
-        progress: {}
-      });
-
-    } else {
-      await signInWithEmailAndPassword(auth, email, pass);
-    }
-
-  } catch(e) {
-    const msgs = {
-      'auth/email-already-in-use': 'Email já cadastrado.',
-      'auth/wrong-password': 'Senha incorreta.',
-      'auth/user-not-found': 'Usuário não encontrado.',
-      'auth/invalid-email': 'Email inválido.',
-      'auth/weak-password': 'Senha muito fraca.',
-      'auth/invalid-credential': 'Email ou senha incorretos.',
-    };
-
-    showErr(msgs[e.code] || e.message);
-    btn.disabled = false;
-    btn.textContent = isReg ? 'Criar conta' : 'Entrar';
-  }
-};
-
-window.doLogout = async () => { await signOut(auth); };
-
-// ── AUTH STATE OBSERVER ───────────────────────────────────────────────────────
-/*
- * onAuthStateChanged é chamado automaticamente pelo Firebase:
- * - quando o usuário faz login
- * - quando faz logout
- * - na inicialização (verifica se há sessão salva no browser)
- */
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    showScreen('auth-screen');
-    loader(false);
-    return;
-  }
-
-  currentUser = user;
-
-  const ref = doc(db, 'users', user.uid);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      email: user.email,
-      name: user.displayName || user.email.split('@')[0],
-      isAdmin: ADMIN_EMAILS.includes(user.email),
-      progress: {}
-    });
-  }
-
-  let data = (await getDoc(ref)).data();
-  userDoc = data;
-  progress = data.progress || {};
-
-  // 🔥 garante admin atualizado
-  if (ADMIN_EMAILS.includes(user.email) && !data.isAdmin) {
-    await updateDoc(ref, { isAdmin: true });
-    data.isAdmin = true;
-  }
-
-  await loadCurriculum();
-
-  document.getElementById('nav-user-email').textContent = data.name;
-
-  // 🔥 mostrar botões de admin
-  if (data.isAdmin) {
-    document.getElementById('nav-admin-btn').style.display = 'inline-flex';
-    document.getElementById('nav-users-btn').style.display = 'inline-flex';
-  }
-
-  renderChecklist();
-  showScreen('app-screen');
-  loader(false);
-});
-
-
-
-// ── CURRICULUM (Firestore) ────────────────────────────────────────────────────
-/*
- * O currículo fica em /curriculum/main no Firestore.
- * Se não existir, cria com os dados padrão.
- */
-async function loadCurriculum() {
-  const snap = await getDoc(doc(db, 'curriculum', 'main'));
-  if (snap.exists()) {
-    curriculum = snap.data().sections;
-  } else {
-    curriculum = DEFAULT_DATA;
-    await setDoc(doc(db, 'curriculum', 'main'), { sections: curriculum });
-  }
-}
-
-window.saveCurriculum = async () => {
-  const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  await setDoc(doc(db, 'curriculum', 'main'), { sections: adminSections });
-  curriculum = JSON.parse(JSON.stringify(adminSections));
-  // Reinicia progresso de todos pois os índices mudaram
-  progress = {};
-  await saveProgress();
-  renderChecklist();
-  btn.className = 'save-btn saved';
-  btn.textContent = '✓ Salvo!';
-  setTimeout(() => { btn.className='save-btn'; btn.textContent='Salvar alterações'; btn.disabled=false; }, 2500);
-  toast('Currículo atualizado!', true);
-};
-
-// ── PROGRESS (Firestore) ──────────────────────────────────────────────────────
-async function saveProgress() {
-  await updateDoc(doc(db, 'users', currentUser.uid), { progress });
-}
-
-// ── CHECKLIST RENDER ──────────────────────────────────────────────────────────
-function totalItems() { return curriculum.reduce((a,s) => a + s.items.length, 0); }
-function doneItems()  { return Object.values(progress).filter(Boolean).length; }
-
-function updateProgress() {
-  const d = doneItems(), t = totalItems(), pct = t ? Math.round(d/t*100) : 0;
-  document.getElementById('prog-nums').textContent = d + ' / ' + t;
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-pct').textContent  = pct + '%';
-}
-
-function renderChecklist() {
-  const cont = document.getElementById('sections-container');
-  cont.innerHTML = '';
-  curriculum.forEach((sec, si) => {
-    const doneInSec = sec.items.filter((_,ii) => progress[si+'-'+ii]).length;
-    const ps = PRIO_STYLE[sec.prio] || PRIO_STYLE['revisar'];
-    const div = document.createElement('div');
-    div.className = 'section';
-    div.innerHTML = `
-      <div class="sec-head">
-        <span class="cat-dot" style="background:${sec.color}"></span>
-        <span class="sec-title">${sec.cat}</span>
-        <span class="prio-badge" style="background:${ps.bg};color:${ps.text}">${sec.prio}</span>
-        <span class="sec-count" id="seccount-${si}">${doneInSec}/${sec.items.length}</span>
-      </div>
-      <div class="items" id="items-${si}"></div>`;
-    cont.appendChild(div);
-
-    const itemsEl = document.getElementById('items-'+si);
-    sec.items.forEach((txt, ii) => {
-      const id = si+'-'+ii;
-      const el = document.createElement('div');
-      el.id = 'item-'+id;
-      el.className = 'item' + (progress[id] ? ' done' : '');
-      el.innerHTML = `<span class="cb${progress[id]?' on':''}">
-        ${progress[id]?'✓':''}</span><span class="item-text">${txt}</span>`;
-      el.onclick = () => toggleItem(id, si);
-      itemsEl.appendChild(el);
-    });
-  });
-  updateProgress();
-}
-
-window.toggleItem = async (id, si) => {
-  progress[id] = !progress[id];
-  // Atualiza UI imediatamente (não espera o Firestore)
-  const el = document.getElementById('item-'+id);
-  if (el) {
-    el.className = 'item' + (progress[id] ? ' done' : '');
-    const cb = el.querySelector('.cb');
-    cb.className = 'cb' + (progress[id] ? ' on' : '');
-    cb.textContent = progress[id] ? '✓' : '';
-  }
-  // Atualiza contador da seção
-  const sec = curriculum[si];
-  if (sec) {
-    const done = sec.items.filter((_,ii) => progress[si+'-'+ii]).length;
-    const el2 = document.getElementById('seccount-'+si);
-    if (el2) el2.textContent = done+'/'+sec.items.length;
-  }
-  updateProgress();
-  await saveProgress(); // salva no Firestore em background
-};
-
-window.resetProgress = async () => {
-  if (!confirm('Reiniciar todo o progresso?')) return;
-  progress = {};
-  await saveProgress();
-  renderChecklist();
-  toast('Progresso reiniciado');
-};
-
-// ── ADMIN RENDER ──────────────────────────────────────────────────────────────
-function renderAdmin() {
-  adminSections = JSON.parse(JSON.stringify(curriculum));
-  window.adminSections = adminSections;
-  const cont = document.getElementById('admin-sections');
-  cont.innerHTML = '';
-  adminSections.forEach((sec, si) => {
-    const ps = PRIO_STYLE[sec.prio] || PRIO_STYLE['revisar'];
-    const div = document.createElement('div');
-    div.className = 'admin-sec';
-    div.id = 'admin-sec-'+si;
-    div.innerHTML = `
-      <div class="admin-sec-head" onclick="toggleAdminSec(${si})">
-        <span class="cat-dot" style="background:${sec.color}"></span>
-        <span class="admin-sec-title">${sec.cat}</span>
-        <select class="prio-select" onclick="event.stopPropagation()" onchange="updatePrio(${si},this.value)">
-          ${['obrigatório','importante','revisar','atenção máxima'].map(p=>`<option${p===sec.prio?' selected':''}>${p}</option>`).join('')}
-        </select>
-        <button class="icon-btn del" style="margin-left:8px" onclick="removeSection(event,${si})">✕</button>
-      </div>
-      <div class="admin-sec-body" id="admin-body-${si}">
-        <div id="admin-items-${si}"></div>
-        <div class="add-item-row">
-          <input id="new-item-${si}" placeholder="Novo item…"/>
-          <button onclick="addItem(${si})">+ Adicionar</button>
-        </div>
-      </div>`;
-    cont.appendChild(div);
-    renderAdminItems(si);
-  });
-}
-
-function renderAdminItems(si) {
-  const cont = document.getElementById('admin-items-'+si);
-  if (!cont) return;
-  cont.innerHTML = '';
-  adminSections[si].items.forEach((txt, ii) => {
-    const row = document.createElement('div');
-    row.className = 'admin-item-row';
-    row.innerHTML = `<span class="admin-item-txt">${txt}</span>
-      <button class="icon-btn edit" onclick="editItem(${si},${ii})">✎</button>
-      <button class="icon-btn del" onclick="removeItem(${si},${ii})">✕</button>`;
-    cont.appendChild(row);
-  });
-}
-
-window.toggleAdminSec = (si) => {
-  const body = document.getElementById('admin-body-'+si);
-  body.className = 'admin-sec-body' + (body.className.includes('open') ? '' : ' open');
-};
-
-window.updatePrio = (si, val) => { adminSections[si].prio = val; };
-
-window.removeSection = (e, si) => {
-  e.stopPropagation();
-  if (!confirm('Remover categoria "'+adminSections[si].cat+'"?')) return;
-  adminSections.splice(si, 1);
-  renderAdmin();
-};
-
-window.addItem = (si) => {
-  const inp = document.getElementById('new-item-'+si);
-  const txt = inp.value.trim();
-  if (!txt) return;
-  adminSections[si].items.push(txt);
-  inp.value = '';
-  renderAdminItems(si);
-};
-
-window.editItem = (si, ii) => {
-  const txt = prompt('Editar:', adminSections[si].items[ii]);
-  if (txt === null || !txt.trim()) return;
-  adminSections[si].items[ii] = txt.trim();
-  renderAdminItems(si);
-};
-
-window.removeItem = (si, ii) => {
-  adminSections[si].items.splice(ii, 1);
-  renderAdminItems(si);
-};
-
-window.addCategory = () => {
-  const inp = document.getElementById('new-cat-input');
-  const prio = document.getElementById('new-cat-prio').value;
-  const name = inp.value.trim();
-  if (!name) return;
-  const colors = ['#AFA9EC','#85B7EB','#5DCAA5','#F0997B','#F4C0D1','#97C459','#FAC775','#ED93B1'];
-  adminSections.push({ cat: name, color: colors[adminSections.length % colors.length], prio, items: [] });
-  window.adminSections = adminSections;
-  inp.value = '';
-  renderAdmin();
-  // Abre automaticamente a nova seção
-  setTimeout(() => toggleAdminSec(adminSections.length-1), 50);
-};
-
-// ── USERS VIEW ────────────────────────────────────────────────────────────────
-async function loadUsersView() {
-  const cont = document.getElementById('users-list');
-  cont.innerHTML = '<p style="color:var(--muted);font-size:13px">Carregando…</p>';
-  try {
-    const snap = await getDocs(collection(db, 'users'));
-    const total = curriculum.reduce((a,s)=>a+s.items.length,0);
-    cont.innerHTML = '';
-    snap.forEach(d => {
-      const u = d.data();
-      const done = Object.values(u.progress||{}).filter(Boolean).length;
-      const pct = total ? Math.round(done/total*100) : 0;
-      const letter = (u.name||u.email||'?')[0].toUpperCase();
-      const row = document.createElement('div');
-      row.className = 'user-row';
-      row.innerHTML = `
-        <div class="user-avatar">${letter}</div>
-        <div style="flex:1;min-width:0">
-          <div class="user-email">${u.name || u.email}</div>
-          <div style="font-size:11px;color:var(--muted)">${u.email}</div>
-        </div>
-        <span class="user-role ${u.isAdmin?'admin':'student'}">${u.isAdmin?'Admin':'Aluno'}</span>
-        <span class="user-prog">${done}/${total} (${pct}%)</span>`;
-      cont.appendChild(row);
-    });
-    if (!snap.size) cont.innerHTML = '<p style="color:var(--muted);font-size:13px">Nenhum aluno cadastrado.</p>';
-  } catch(e) {
-    cont.innerHTML = '<p style="color:var(--muted);font-size:13px">Erro ao carregar usuários.</p>';
-  }
-}
-
-// ── DADOS PADRÃO ──────────────────────────────────────────────────────────────
-const DEFAULT_DATA = [
-  {cat:"Banco de dados",color:"#AFA9EC",prio:"obrigatório",items:["Ler e escrever SELECT com múltiplos filtros AND/OR/NOT","Identificar cardinalidade (1:1, 1:N, N:M) e participação total/parcial em diagrama ER","Chave primária, chave estrangeira e integridade referencial","INNER JOIN vs LEFT JOIN — resultado esperado de cada um"]},
-  {cat:"Algoritmos e estruturas",color:"#85B7EB",prio:"obrigatório",items:["Complexidades: O(1) hash, O(log n) busca binária, O(n log n) merge sort, O(n²) bubble sort","Pilha (LIFO/push-pop) vs Fila (FIFO/enqueue-dequeue)","AVL: fator = altura(esq) − altura(dir), deve ser -1, 0 ou +1","LCS é resolvida com programação dinâmica (tabela 2D de subproblemas)"]},
-  {cat:"Redes e segurança",color:"#5DCAA5",prio:"obrigatório",items:["TCP = confiável + lento; UDP = sem garantia + rápido (VoIP, jogos, DNS)","OSPF usa Dijkstra para caminho mínimo entre roteadores (camada 3)","CIA: Confidencialidade + Integridade + Disponibilidade — saber exemplos","3DES = EDE com chaves K1, K2, K3"]},
-  {cat:"Engenharia de software",color:"#F0997B",prio:"obrigatório",items:["include = obrigatório sempre; extend = condicional (ENADE troca nas alternativas!)","Strategy: algoritmos intercambiáveis; Singleton: uma só instância","CMMI: 5 níveis (1–5); MPS-SW: 7 níveis (G→A), para PMEs brasileiras","Diagrama de sequência: seta cheia = síncrona; seta aberta = retorno"]},
-  {cat:"Sistemas operacionais",color:"#F4C0D1",prio:"importante",items:["Ciclo: Novo → Pronto → Execução → Bloqueado → Pronto (não vai direto pra Execução!)","Round Robin: calcular término de cada processo dado quantum e burst","Race condition: duas threads no mesmo recurso sem sincronização → imprevisível"]},
-  {cat:"Big Data e sistemas",color:"#97C459",prio:"importante",items:["4 Vs: Volume, Variedade, Velocidade, Veracidade","Estruturados (tabelas) vs semiestruturados (JSON) vs não estruturados (imagens)","SIG: apoio à gestão; sistema especialista = base de conhecimento + motor de inferência"]},
-  {cat:"Fórmulas e conceitos",color:"#FAC775",prio:"revisar",items:["AVL: FB = h(esquerda) − h(direita) → deve ser ∈ {-1, 0, 1}","3DES: C = E_K3(D_K2(E_K1(P))) — EDE com 3 chaves","Dijkstra: d[v] = min(d[v], d[u] + w(u,v))","Round Robin: tempo_Pi = Σ quantum anteriores + quantum_próprio","LCS: L[i][j] = L[i-1][j-1]+1 se X[i]=Y[j], senão max(L[i-1][j], L[i][j-1])"]},
-  {cat:"Conceitos que confundem",color:"#ED93B1",prio:"atenção máxima",items:["Participação total ≠ cardinalidade máxima N no diagrama ER","Autenticação (quem é) ≠ Autorização (o que pode fazer)","OSPF (roteadores, camada 3) ≠ Spanning Tree (switches, camada 2)","include (obrigatório) ≠ extend (condicional) nos casos de uso"]}
-];
-
-const PRIO_STYLE = {
-  "obrigatório":    {bg:"#2a1a1a",text:"#f87171"},
-  "importante":     {bg:"#2a2010",text:"#fbbf24"},
-  "revisar":        {bg:"#0f1f2e",text:"#60a5fa"},
-  "atenção máxima": {bg:"#2a0f1a",text:"#f472b6"},
+<script>
+  // Variáveis de ambiente injetadas automaticamente
+  window.__ENV__ = {
+  "VITE_FIREBASE_API_KEY": "AIzaSyBMA-vCw5wFp1WaF_rj8508oZQHpT2rsxQ",
+  "VITE_FIREBASE_AUTH_DOMAIN": "enadequestoes.firebaseapp.com",
+  "VITE_FIREBASE_PROJECT_ID": "enadequestoes",
+  "VITE_FIREBASE_STORAGE_BUCKET": "enadequestoes.firebasestorage.app",
+  "VITE_FIREBASE_MESSAGING_SENDER_ID": "541044453598",
+  "VITE_FIREBASE_APP_ID": "1:541044453598:web:3fa61640e1527f0962524f",
+  "VITE_ADMIN_EMAILS": "admintop@admin.com"
 };
 </script>
+<script type="module" src="./js/app.js"></script>
 </body>
 </html>
