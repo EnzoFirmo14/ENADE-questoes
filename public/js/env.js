@@ -27,9 +27,11 @@ function getEnv(key, defaultValue = null) {
   }
 
   // 3. Tentar import.meta.env (Vite)
-  if (typeof import !== 'undefined' && import.meta?.env?.[key]) {
-    return import.meta.env[key];
-  }
+  try {
+    if (import.meta && import.meta.env && import.meta.env[key]) {
+      return import.meta.env[key];
+    }
+  } catch (_) {}
 
   // 4. Tentar process.env (Node.js)
   if (typeof process !== 'undefined' && process.env?.[key]) {
@@ -74,7 +76,7 @@ export function validateEnv() {
 
   if (missing.length > 0) {
     console.warn(
-      '⚠️ Variáveis de ambiente faltando:',
+      'Variáveis de ambiente faltando:',
       missing.join(', ')
     );
     return false;
@@ -87,7 +89,9 @@ export function validateEnv() {
  * Verifica se as variáveis estão configuradas
  */
 export function hasEnv() {
-  return ENV.FIREBASE_API_KEY && 
-         ENV.FIREBASE_AUTH_DOMAIN && 
-         ENV.FIREBASE_PROJECT_ID;
+  return !!(
+    ENV.FIREBASE_API_KEY &&
+    ENV.FIREBASE_AUTH_DOMAIN &&
+    ENV.FIREBASE_PROJECT_ID
+  );
 }

@@ -9,7 +9,8 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  updatePassword
 } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 import {
   getFirestore,
@@ -61,14 +62,15 @@ try {
   throw error;
 }
 
-export { auth, db };
+export { app, auth, db };
 
 export {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  updatePassword
 };
 
 export {
