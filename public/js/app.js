@@ -505,9 +505,24 @@ onAuthStateChanged(auth, async (user) => {
       qs('account-dropdown').classList.remove('open');
     }
 
+    // limpa os campos da conta quando sair
+    if (qs('account-email')) {
+      qs('account-email').value = '';
+    }
+    if (qs('account-name-input')) {
+      qs('account-name-input').value = '';
+    }
+    if (qs('account-pass-input')) {
+      qs('account-pass-input').value = '';
+    }
+    if (qs('account-pass-confirm-input')) {
+      qs('account-pass-confirm-input').value = '';
+    }
+
     return;
   }
 
+  // user LOGADO daqui pra baixo
   currentUser = user;
   const ref = doc(db, 'users', user.uid);
   const snap = await getDoc(ref);
@@ -536,14 +551,17 @@ onAuthStateChanged(auth, async (user) => {
     qs('nav-user-email').textContent = data.name;
   }
 
+  // aqui preenche o EMAIL da pessoa logada
+  if (qs('account-email')) {
+    qs('account-email').value = user.email || data.email || '';
+  }
+
   if (qs('account-name-input')) {
     qs('account-name-input').value = data.name;
   }
-
   if (qs('account-pass-input')) {
     qs('account-pass-input').value = '';
   }
-
   if (qs('account-pass-confirm-input')) {
     qs('account-pass-confirm-input').value = '';
   }
@@ -551,7 +569,6 @@ onAuthStateChanged(auth, async (user) => {
   if (qs('nav-admin-btn')) {
     qs('nav-admin-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
   }
-
   if (qs('nav-users-btn')) {
     qs('nav-users-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
   }

@@ -1,56 +1,42 @@
-#!/usr/bin/env node
-/**
- * Script para injetar variáveis de ambiente no index.html
- * Uso: node scripts/inject-env.js
- * 
- * Lê .env e injeta as variáveis como window.__ENV__
- */
+// scripts/inject-env.js
+// Gera public/js/env.js a partir do arquivo .env
 
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
 
-// Ler arquivo .env
-const envPath = path.join(__dirname, '../.env');
+const rootDir = path.join(__dirname, '..');
+const envPath = path.join(rootDir, '.env');
+const outDir = path.join(rootDir, 'public', 'js');
+const outFile = path.join(outDir, 'env.js');
+
+// Carrega o .env
 if (!fs.existsSync(envPath)) {
-  console.error('❌ Arquivo .env não encontrado. Execute: cp .env.example .env');
-  process.exit(1);
+  console.warn('[inject-env] Arquivo .env não encontrado em', envPath);
+} else {
+  dotenv.config({ path: envPath });
 }
 
-// Parse .env
-const envContent = fs.readFileSync(envPath, 'utf-8');
-const env = {};
+// Mapeia variáveis expostas no front
+const ENV = {
+  VITE_FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY || '',
+  VITE_FIREBASE_AUTH_DOMAIN: process.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID || '',
+  VITE_FIREBASE_STORAGE_BUCKET: process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  VITE_FIREBASE_MESSAGING_SENDER_ID: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID || '',
+  VITE_ADMIN_EMAILS: process.env.VITE_ADMIN_EMAILS || ''
+};
 
-envContent.split('\n').forEach(line => {
-  const trimmedLine = line.trim();
-  if (!trimmedLine || trimmedLine.startsWith('#')) return;
-  
-  const [key, ...valueParts] = trimmedLine.split('=');
-  const value = valueParts.join('=').replace(/^["']|["']$/g, '');
-  
-  if (key) {
-    env[key] = value;
-  }
-});
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true });
+}
 
-// Gerar script
-const envScript = `<script>
-  // Variáveis de ambiente injetadas automaticamente
-  window.__ENV__ = ${JSON.stringify(env, null, 2)};
-</script>\n`;
+const fileContents =
+  `// Arquivo gerado automaticamente por scripts/inject-env.js\n` +
+  `// NÃO edite este arquivo manualmente. Altere o .env na raiz do projeto.\n\n` +
+  `window.__ENV__ = ${JSON.stringify(ENV, null, 2)};\n`;
 
-// Inserir antes de app.js
-const indexPath = path.join(__dirname, '../public/index.html');
-let htmlContent = fs.readFileSync(indexPath, 'utf-8');
+fs.writeFileSync(outFile, fileContents, 'utf8');
 
-// Remover script anterior se existir
-htmlContent = htmlContent.replace(/<script>\s*\/\/ Variáveis de ambiente injetadas[\s\S]*?<\/script>\n?/g, '');
-
-// Inserir novo script
-const appScriptPattern = /<script[^>]*type="module"\s+src="\.\/js\/app\.js"[^>]*><\/script>/;
-htmlContent = htmlContent.replace(appScriptPattern, envScript + '<script type="module" src="./js/app.js"></script>');
-
-// Salvar
-fs.writeFileSync(indexPath, htmlContent);
-
-console.log('✅ Variáveis de ambiente injetadas no index.html');
-console.log('📍 Execute: firebase serve');
+console.log('[inject-env] public/js/env.js gerado com sucesso.');
