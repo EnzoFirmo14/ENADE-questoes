@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node scripts/inject-env.js && npx firebase serve",
     "inject-env": "node scripts/inject-env.js",
-    "deploy": "firebase deploy",
+    "deploy": "npm run inject-env && firebase deploy",
     "build": "node scripts/inject-env.js"
   },
   "keywords": [
@@ -16,8 +16,13 @@
     "educação"
   ],
   "author": "EnzoFirmo14",
+  "contributors": [
+    "maiconalmeida00"
+  ],
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "dotenv": "^16.6.1"
+  },
   "engines": {
     "node": ">=14.0.0"
   }

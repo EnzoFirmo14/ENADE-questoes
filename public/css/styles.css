@@ -1069,3 +1069,24 @@ button {
     max-width: 90px;
   }
 }
+
+/* ================= NAVBAR ================= */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.nav-brand span span {
+  color: var(--accent2);
+}
+
+.nav-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  display: block;
+}
