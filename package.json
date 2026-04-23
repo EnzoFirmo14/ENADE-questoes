@@ -1,0 +1,24 @@
+{
+  "name": "enade-questoes",
+  "version": "1.0.0",
+  "description": "Aplicação web para acompanhamento de estudos para o ENADE",
+  "main": "public/js/app.js",
+  "scripts": {
+    "dev": "node scripts/inject-env.js && npx firebase serve",
+    "inject-env": "node scripts/inject-env.js",
+    "deploy": "firebase deploy",
+    "build": "node scripts/inject-env.js"
+  },
+  "keywords": [
+    "ENADE",
+    "checklist",
+    "Firebase",
+    "educação"
+  ],
+  "author": "EnzoFirmo14",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
