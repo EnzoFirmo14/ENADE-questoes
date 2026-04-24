@@ -122,7 +122,7 @@
                 />
               </div>
 
-              <!-- NOVO: seleção de curso na conta -->
+              <!-- seleção de curso na conta -->
               <div class="field">
                 <label for="account-course">Curso</label>
                 <select id="account-course" class="select-like">
@@ -177,9 +177,9 @@
           </div>
         </div>
 
-        <button class="nav-btn" id="nav-admin-btn" style="display:none">⚙ Admin</button>
-        <button class="nav-btn" id="nav-users-btn" style="display:none">👥 Alunos</button>
-        <button class="nav-btn" id="nav-checklist-btn" style="display:none">← Checklist</button>
+        <button class="nav-btn" id="nav-admin-btn" style="display:none">⚙ Configurações</button>
+        <button class="nav-btn" id="nav-users-btn" style="display:none">👥 Usuários</button>
+        <button class="nav-btn" id="nav-checklist-btn" style="display:none">📋 Checklist</button>
         <button class="nav-btn" id="logout-btn">Sair</button>
       </nav>
 
@@ -231,11 +231,51 @@
         <div class="users-wrap">
           <div class="admin-header">
             <div>
-              <h2>Alunos cadastrados</h2>
-              <p>Progresso de cada aluno no checklist</p>
+              <h2>Usuários cadastrados</h2>
+              <p>Progresso de cada usuário no checklist</p>
             </div>
           </div>
           <div id="users-list"><p class="muted-msg">Carregando…</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO DE ALUNO (ADMIN) -->
+    <div class="modal-backdrop" id="edit-user-modal" style="display:none;">
+      <div class="modal">
+        <h3>Editar aluno</h3>
+        <p class="modal-sub">Atualize o nome e o curso do aluno.</p>
+
+        <div class="field">
+          <label for="edit-user-name">Nome</label>
+          <input id="edit-user-name" type="text" placeholder="Nome do aluno" />
+        </div>
+
+        <div class="field">
+          <label for="edit-user-course">Curso</label>
+          <select id="edit-user-course" class="select-like">
+            <option value="">Sem curso</option>
+            <option value="ADS (Análise e Desenvolvimento de Sistemas)">ADS (Análise e Desenvolvimento de Sistemas)</option>
+            <option value="SI (Sistemas de Informação)">SI (Sistemas de Informação)</option>
+            <option value="ES (Engenharia de Software)">ES (Engenharia de Software)</option>
+            <option value="EC (Engenharia da Computação)">EC (Engenharia da Computação)</option>
+          </select>
+        </div>
+
+        <!-- Campo para promover a admin (só visível para admins) -->
+        <div class="field" id="edit-user-admin-field" style="display:none;">
+          <label class="checkbox-label">
+            <input id="edit-user-is-admin" type="checkbox" />
+            <span>Tornar administrador</span>
+          </label>
+          <small style="display:block;margin-top:4px;color:var(--muted)">
+            Permite que este usuário edite categorias, itens e gerencie outros usuários.
+          </small>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="edit-user-cancel">Cancelar</button>
+          <button type="button" class="btn-primary" id="edit-user-save">Salvar</button>
         </div>
       </div>
     </div>

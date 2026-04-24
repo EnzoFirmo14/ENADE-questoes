@@ -70,7 +70,7 @@ export function renderAdmin(adminSections, handlers) {
     div.innerHTML = `
       <div class="admin-sec-head" data-head="${si}">
         <span class="cat-dot" style="background:${sec.color}"></span>
-        <span class="admin-sec-title">☰ ${sec.cat}</span>
+        <span class="admin-sec-title" data-head-title="${si}">☰ ${sec.cat}</span>
         <select class="prio-select" data-prio="${si}">
           ${['obrigatório', 'importante', 'revisar', 'atenção máxima']
             .map(p => `<option${p === sec.prio ? ' selected' : ''}>${p}</option>`)
@@ -97,7 +97,6 @@ export function renderAdmin(adminSections, handlers) {
 
       <!-- Linha de cursos (chips) -->
       <div class="admin-courses-row" id="admin-courses-${si}">
-        <!-- TODOS -->
         <label class="pill-check">
           <input
             type="checkbox"
@@ -117,6 +116,7 @@ export function renderAdmin(adminSections, handlers) {
           >
           <span>ADS (Análise e Desenvolvimento de Sistemas)</span>
         </label>
+
         <label class="pill-check">
           <input
             type="checkbox"
@@ -126,6 +126,7 @@ export function renderAdmin(adminSections, handlers) {
           >
           <span>SI (Sistemas de Informação)</span>
         </label>
+
         <label class="pill-check">
           <input
             type="checkbox"
@@ -135,6 +136,7 @@ export function renderAdmin(adminSections, handlers) {
           >
           <span>ES (Engenharia de Software)</span>
         </label>
+
         <label class="pill-check">
           <input
             type="checkbox"
@@ -151,11 +153,10 @@ export function renderAdmin(adminSections, handlers) {
     renderAdminItems(adminSections, si, handlers);
   });
 
-  // Expandir/contrair seção
-  cont.querySelectorAll('[data-head]').forEach(el => {
-    el.addEventListener('click', e => {
-      if (e.target.closest('select') || e.target.closest('button')) return;
-      handlers.toggleAdminSec(Number(el.dataset.head));
+  // Expandir/contrair seção: agora só clicando no título
+  cont.querySelectorAll('[data-head-title]').forEach(el => {
+    el.addEventListener('click', () => {
+      handlers.toggleAdminSec(Number(el.dataset.headTitle));
     });
   });
 
@@ -182,7 +183,8 @@ export function renderAdmin(adminSections, handlers) {
 
   // Abrir/fechar seleção de cursos
   cont.querySelectorAll('[data-courses-toggle]').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', e => {
+      e.stopPropagation(); // clicar no toggle não colapsa a seção
       const si = Number(el.dataset.coursesToggle);
       const row = qs(`admin-courses-${si}`);
       if (!row) return;
@@ -195,12 +197,18 @@ export function renderAdmin(adminSections, handlers) {
     });
   });
 
-  // Mudança nos cursos (checkboxes)
-  cont.querySelectorAll('input[type="checkbox"][data-course]').forEach(input => {
-    input.addEventListener('change', () => {
+  // Clique nos cursos (linha inteira, com delegação) – nunca fecha a seção
+  cont.querySelectorAll('.admin-courses-row').forEach(row => {
+    row.addEventListener('click', e => {
+      e.stopPropagation(); // qualquer clique aqui NÃO fecha/abre categoria
+
+      const input = e.target.closest('input[type="checkbox"][data-course]');
+      if (!input) return;
+
       const si = Number(input.dataset.sec);
       const courseId = input.dataset.course;
       const checked = input.checked;
+
       if (handlers.toggleSectionCourse) {
         handlers.toggleSectionCourse(si, courseId, checked);
       }
