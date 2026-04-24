@@ -12,6 +12,7 @@ import { renderChecklist, syncChecklistItem, totalItems } from './views/checklis
 import { renderAdmin, renderAdminItems, toggleAdminSec, nextCategoryColor } from './views/admin.js';
 import { renderUsersList } from './views/users.js';
 
+
 // ============================================
 // VARIÁVEIS GLOBAIS
 // ============================================
@@ -21,6 +22,7 @@ let curriculum = [];
 let progress = {};
 let adminSections = [];
 let draggedSectionIndex = null;
+
 
 // ============================================
 // AUTENTICAÇÃO
@@ -56,6 +58,7 @@ async function doAuth() {
   const pass = qs('inp-pass')?.value || '';
   const passConfirm = qs('inp-pass-confirm')?.value || '';
   const name = qs('inp-name')?.value.trim() || '';
+  const course = qs('inp-course')?.value || '';
   const isReg = qs('tab-reg')?.classList.contains('on');
   const btn = qs('auth-btn');
 
@@ -66,6 +69,10 @@ async function doAuth() {
   if (isReg) {
     if (!name) {
       return showErr('Preencha seu nome.');
+    }
+
+    if (!course) {
+      return showErr('Selecione seu curso.');
     }
 
     if (pass.length < 6) {
@@ -92,6 +99,7 @@ async function doAuth() {
         email,
         name: name || email.split('@')[0],
         isAdmin: false,
+        course,
         progress: {}
       });
     } else {
@@ -118,6 +126,10 @@ function updateAuthModeUI() {
 
   if (qs('name-field')) {
     qs('name-field').style.display = isReg ? 'block' : 'none';
+  }
+
+  if (qs('course-field')) {
+    qs('course-field').style.display = isReg ? 'block' : 'none';
   }
 
   if (qs('confirm-pass-field')) {
@@ -147,6 +159,7 @@ function togglePassword(btn) {
 async function doLogout() {
   await signOut(auth);
 }
+
 
 // ============================================
 // MENU DE CONTA
@@ -191,6 +204,7 @@ async function saveAccountData() {
   const newName = qs('account-name-input')?.value.trim() || '';
   const newPass = qs('account-pass-input')?.value || '';
   const confirmPass = qs('account-pass-confirm-input')?.value || '';
+  const newCourse = qs('account-course')?.value || '';
 
   if (errBox) {
     errBox.style.display = 'none';
@@ -227,7 +241,10 @@ async function saveAccountData() {
     }
 
     await updateProfile(currentUser, { displayName: newName });
-    await updateDoc(doc(db, 'users', currentUser.uid), { name: newName });
+    await updateDoc(doc(db, 'users', currentUser.uid), {
+      name: newName,
+      course: newCourse
+    });
 
     if (newPass) {
       await updatePassword(currentUser, newPass);
@@ -235,6 +252,7 @@ async function saveAccountData() {
 
     if (userDoc) {
       userDoc.name = newName;
+      userDoc.course = newCourse;
     }
 
     if (qs('nav-user-email')) {
@@ -243,6 +261,9 @@ async function saveAccountData() {
 
     if (qs('account-name-input')) {
       qs('account-name-input').value = newName;
+    }
+    if (qs('account-course')) {
+      qs('account-course').value = newCourse;
     }
 
     if (qs('account-pass-input')) {
@@ -256,6 +277,13 @@ async function saveAccountData() {
     if (qs('account-dropdown')) {
       qs('account-dropdown').classList.remove('open');
     }
+
+    // re-aplica filtro do checklist com o novo curso
+    initChecklistCourseFilter({
+      ...userDoc,
+      name: newName,
+      course: newCourse
+    });
 
     toast('Dados atualizados com sucesso!', true);
   } catch (e) {
@@ -271,6 +299,7 @@ async function saveAccountData() {
   }
 }
 
+
 // ============================================
 // CURRÍCULO E PROGRESSO
 // ============================================
@@ -285,6 +314,13 @@ async function loadCurriculum() {
     curriculum = [];
     await setDoc(ref, { sections: [] });
   }
+
+  // NOVO: garante que sempre exista um array de courses
+  curriculum.forEach(sec => {
+    if (!Array.isArray(sec.courses)) {
+      sec.courses = [];
+    }
+  });
 }
 
 async function saveProgress() {
@@ -323,6 +359,7 @@ async function resetProgress() {
   toast('Progresso reiniciado');
 }
 
+
 // ============================================
 // NAVEGAÇÃO E VISUALIZAÇÃO
 // ============================================
@@ -354,6 +391,56 @@ async function toggleItem(id, si) {
   await saveProgress();
 }
 
+
+// ============================================
+// FILTRO POR CURSO NA CHECKLIST
+// ============================================
+
+function applyCourseFilter(courseValue, isAdmin) {
+  const filtered =
+    !courseValue || isAdmin
+      ? curriculum
+      : curriculum.filter(
+          sec =>
+            Array.isArray(sec.courses) &&
+            (sec.courses.includes('__ALL__') ||
+             sec.courses.includes(courseValue))
+        );
+
+  renderChecklist(filtered, progress, toggleItem);
+
+  if (!filtered.length && qs('sections-container')) {
+    qs('sections-container').innerHTML = `
+      <div class="section">
+        <div class="sec-head">
+          <span class="sec-title">Nenhuma matéria para este curso</span>
+        </div>
+        <div class="items">
+          <div class="item">
+            <span class="item-text">
+              Ajuste o filtro de curso ou peça para o admin associar matérias a este curso.
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function initChecklistCourseFilter(userData) {
+  const isAdmin = !!userData.isAdmin;
+  const userCourse = userData.course || '';
+
+  if (isAdmin) {
+    // Admin sempre vê tudo
+    applyCourseFilter('', true);
+  } else {
+    // Aluno vê só matérias do curso dele
+    applyCourseFilter(userCourse, false);
+  }
+}
+
+
 // ============================================
 // ADMINISTRAÇÃO
 // ============================================
@@ -379,11 +466,41 @@ function renderAdminView() {
     addItem,
     editItem,
     removeItem,
+    toggleSectionCourse,
     onDragStart,
     onDragOver,
     onDrop,
     onDragEnd
   });
+}
+
+function toggleSectionCourse(si, courseId, checked) {
+  const sec = adminSections[si];
+  if (!Array.isArray(sec.courses)) {
+    sec.courses = [];
+  }
+
+  if (courseId === '__ALL__') {
+    if (checked) {
+      sec.courses = ['__ALL__'];
+    } else {
+      sec.courses = [];
+    }
+  } else {
+    // se estava em "Todos", remove esse estado
+    sec.courses = sec.courses.filter(c => c !== '__ALL__');
+
+    if (checked) {
+      if (!sec.courses.includes(courseId)) {
+        sec.courses.push(courseId);
+      }
+    } else {
+      sec.courses = sec.courses.filter(c => c !== courseId);
+    }
+  }
+
+  // re-render para atualizar os checkboxes na tela
+  renderAdminView();
 }
 
 function removeSection(e, si) {
@@ -440,7 +557,8 @@ function addCategory() {
     cat: name,
     color: nextCategoryColor(adminSections.length),
     prio,
-    items: []
+    items: [],
+    courses: []
   });
 
   if (qs('new-cat-input')) {
@@ -458,6 +576,7 @@ function addCategory() {
 
   toast('Categoria criada. Agora adicione os assuntos.');
 }
+
 
 // ============================================
 // VISUALIZAÇÃO DE USUÁRIOS
@@ -478,6 +597,7 @@ async function loadUsersView() {
     cont.innerHTML = '<p class="muted-msg">Erro ao carregar usuários.</p>';
   }
 }
+
 
 // ============================================
 // AUTENTICAÇÃO - MONITORAMENTO DE ESTADO
@@ -505,12 +625,14 @@ onAuthStateChanged(auth, async (user) => {
       qs('account-dropdown').classList.remove('open');
     }
 
-    // limpa os campos da conta quando sair
     if (qs('account-email')) {
       qs('account-email').value = '';
     }
     if (qs('account-name-input')) {
       qs('account-name-input').value = '';
+    }
+    if (qs('account-course')) {
+      qs('account-course').value = '';
     }
     if (qs('account-pass-input')) {
       qs('account-pass-input').value = '';
@@ -532,6 +654,7 @@ onAuthStateChanged(auth, async (user) => {
       email: user.email,
       name: user.displayName || user.email.split('@')[0],
       isAdmin: ADMIN_EMAILS.includes(user.email),
+      course: '',
       progress: {}
     });
   }
@@ -551,13 +674,15 @@ onAuthStateChanged(auth, async (user) => {
     qs('nav-user-email').textContent = data.name;
   }
 
-  // aqui preenche o EMAIL da pessoa logada
   if (qs('account-email')) {
     qs('account-email').value = user.email || data.email || '';
   }
 
   if (qs('account-name-input')) {
     qs('account-name-input').value = data.name;
+  }
+  if (qs('account-course')) {
+    qs('account-course').value = data.course || '';
   }
   if (qs('account-pass-input')) {
     qs('account-pass-input').value = '';
@@ -573,7 +698,9 @@ onAuthStateChanged(auth, async (user) => {
     qs('nav-users-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
   }
 
-  renderChecklistView();
+  // inicializa checklist com filtro de curso
+  initChecklistCourseFilter(data);
+
   showScreen('app-screen');
   loader(false);
   clearErr();
@@ -583,6 +710,7 @@ onAuthStateChanged(auth, async (user) => {
     qs('auth-btn').textContent = 'Entrar';
   }
 });
+
 
 // ============================================
 // DRAG AND DROP PARA REORDENAR CATEGORIAS
@@ -622,6 +750,7 @@ function onDragEnd(e) {
   e.currentTarget.classList.remove('dragging');
   draggedSectionIndex = null;
 }
+
 
 // ============================================
 // INICIALIZAÇÃO

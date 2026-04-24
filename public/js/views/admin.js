@@ -64,6 +64,9 @@ export function renderAdmin(adminSections, handlers) {
     div.setAttribute('draggable', 'true');
     div.dataset.index = si;
 
+    // garante que sempre exista um array de cursos
+    const courses = Array.isArray(sec.courses) ? sec.courses : [];
+
     div.innerHTML = `
       <div class="admin-sec-head" data-head="${si}">
         <span class="cat-dot" style="background:${sec.color}"></span>
@@ -82,6 +85,65 @@ export function renderAdmin(adminSections, handlers) {
           <input id="new-item-${si}" placeholder="Novo item…"/>
           <button data-add-item="${si}">+ Adicionar</button>
         </div>
+      </div>
+
+      <!-- Toggle Cursos -->
+      <div class="admin-courses-toggle" data-courses-toggle="${si}">
+        <span class="field-label">Cursos</span>
+        <button type="button" class="courses-arrow">
+          <span class="arrow-icon">▾</span>
+        </button>
+      </div>
+
+      <!-- Linha de cursos (chips) -->
+      <div class="admin-courses-row" id="admin-courses-${si}">
+        <!-- TODOS -->
+        <label class="pill-check">
+          <input
+            type="checkbox"
+            data-course="__ALL__"
+            data-sec="${si}"
+            ${courses.includes('__ALL__') ? 'checked' : ''}
+          >
+          <span>Todos</span>
+        </label>
+
+        <label class="pill-check">
+          <input
+            type="checkbox"
+            data-course="ADS (Análise e Desenvolvimento de Sistemas)"
+            data-sec="${si}"
+            ${courses.includes('ADS (Análise e Desenvolvimento de Sistemas)') ? 'checked' : ''}
+          >
+          <span>ADS (Análise e Desenvolvimento de Sistemas)</span>
+        </label>
+        <label class="pill-check">
+          <input
+            type="checkbox"
+            data-course="SI (Sistemas de Informação)"
+            data-sec="${si}"
+            ${courses.includes('SI (Sistemas de Informação)') ? 'checked' : ''}
+          >
+          <span>SI (Sistemas de Informação)</span>
+        </label>
+        <label class="pill-check">
+          <input
+            type="checkbox"
+            data-course="ES (Engenharia de Software)"
+            data-sec="${si}"
+            ${courses.includes('ES (Engenharia de Software)') ? 'checked' : ''}
+          >
+          <span>ES (Engenharia de Software)</span>
+        </label>
+        <label class="pill-check">
+          <input
+            type="checkbox"
+            data-course="EC (Engenharia da Computação)"
+            data-sec="${si}"
+            ${courses.includes('EC (Engenharia da Computação)') ? 'checked' : ''}
+          >
+          <span>EC (Engenharia da Computação)</span>
+        </label>
       </div>
     `;
 
@@ -115,6 +177,33 @@ export function renderAdmin(adminSections, handlers) {
   cont.querySelectorAll('[data-add-item]').forEach(el => {
     el.addEventListener('click', () => {
       handlers.addItem(Number(el.dataset.addItem));
+    });
+  });
+
+  // Abrir/fechar seleção de cursos
+  cont.querySelectorAll('[data-courses-toggle]').forEach(el => {
+    el.addEventListener('click', () => {
+      const si = Number(el.dataset.coursesToggle);
+      const row = qs(`admin-courses-${si}`);
+      if (!row) return;
+
+      const isOpen = row.classList.toggle('open');
+      const arrow = el.querySelector('.arrow-icon');
+      if (arrow) {
+        arrow.textContent = isOpen ? '▴' : '▾';
+      }
+    });
+  });
+
+  // Mudança nos cursos (checkboxes)
+  cont.querySelectorAll('input[type="checkbox"][data-course]').forEach(input => {
+    input.addEventListener('change', () => {
+      const si = Number(input.dataset.sec);
+      const courseId = input.dataset.course;
+      const checked = input.checked;
+      if (handlers.toggleSectionCourse) {
+        handlers.toggleSectionCourse(si, courseId, checked);
+      }
     });
   });
 

@@ -31,6 +31,18 @@
           <input id="inp-name" type="text" placeholder="Seu nome" />
         </div>
 
+        <!-- campo de curso: só aparece no registro -->
+        <div class="field" id="course-field" style="display:none;">
+          <label for="inp-course">Curso</label>
+          <select id="inp-course" class="select-like">
+            <option value="">Selecione</option>
+            <option value="ADS (Análise e Desenvolvimento de Sistemas)">ADS (Análise e Desenvolvimento de Sistemas)</option>
+            <option value="SI (Sistemas de Informação)">SI (Sistemas de Informação)</option>
+            <option value="ES (Engenharia de Software)">ES (Engenharia de Software)</option>
+            <option value="EC (Engenharia da Computação)">EC (Engenharia da Computação)</option>
+          </select>
+        </div>
+
         <div class="field">
           <label for="inp-email">Email</label>
           <input id="inp-email" type="email" placeholder="seuemail@exemplo.com" />
@@ -110,6 +122,18 @@
                 />
               </div>
 
+              <!-- NOVO: seleção de curso na conta -->
+              <div class="field">
+                <label for="account-course">Curso</label>
+                <select id="account-course" class="select-like">
+                  <option value="">Selecione</option>
+                  <option value="ADS (Análise e Desenvolvimento de Sistemas)">ADS (Análise e Desenvolvimento de Sistemas)</option>
+                  <option value="SI (Sistemas de Informação)">SI (Sistemas de Informação)</option>
+                  <option value="ES (Engenharia de Software)">ES (Engenharia de Software)</option>
+                  <option value="EC (Engenharia da Computação)">EC (Engenharia da Computação)</option>
+                </select>
+              </div>
+
               <div class="field">
                 <label for="account-pass-input">Nova senha</label>
                 <div class="pass-wrap">
@@ -166,6 +190,7 @@
             <h1>Checklist interativo</h1>
             <p id="hero-greeting">Bom estudo!</p>
           </div>
+
           <div class="prog-bar-wrap">
             <span class="prog-nums" id="prog-nums">0 / 0</span>
             <div class="prog-track">
@@ -174,6 +199,7 @@
             <span class="prog-pct" id="prog-pct">0%</span>
             <button class="reset-btn" id="reset-progress-btn">Reiniciar</button>
           </div>
+
           <div id="sections-container"></div>
         </div>
       </div>
@@ -214,19 +240,19 @@
       </div>
     </div>
 
-    <script src="./js/env.js"></script>
-    <script>
-  // Variáveis de ambiente injetadas automaticamente
-  window.__ENV__ = {
-  "VITE_FIREBASE_API_KEY": "AIzaSyBMA-vCw5wFp1WaF_rj8508oZQHpT2rsxQ",
-  "VITE_FIREBASE_AUTH_DOMAIN": "enadequestoes.firebaseapp.com",
-  "VITE_FIREBASE_PROJECT_ID": "enadequestoes",
-  "VITE_FIREBASE_STORAGE_BUCKET": "enadequestoes.firebasestorage.app",
-  "VITE_FIREBASE_MESSAGING_SENDER_ID": "541044453598",
-  "VITE_FIREBASE_APP_ID": "1:541044453598:web:3fa61640e1527f0962524f",
-  "VITE_ADMIN_EMAILS": "admintop@admin.com"
-};
-</script>
-<script type="module" src="./js/app.js"></script>
-  </body>
+    <script src="./js/env.js"></script>
+    <script>
+      // Variáveis de ambiente injetadas automaticamente
+      window.__ENV__ = {
+        "VITE_FIREBASE_API_KEY": "AIzaSyBMA-vCw5wFp1WaF_rj8508oZQHpT2rsxQ",
+        "VITE_FIREBASE_AUTH_DOMAIN": "enadequestoes.firebaseapp.com",
+        "VITE_FIREBASE_PROJECT_ID": "enadequestoes",
+        "VITE_FIREBASE_STORAGE_BUCKET": "enadequestoes.firebasestorage.app",
+        "VITE_FIREBASE_MESSAGING_SENDER_ID": "541044453598",
+        "VITE_FIREBASE_APP_ID": "1:541044453598:web:3fa61640e1527f0962524f",
+        "VITE_ADMIN_EMAILS": "admintop@admin.com"
+      };
+    </script>
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>
