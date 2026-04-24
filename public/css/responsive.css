@@ -1,0 +1,48 @@
+/* ================= RESPONSIVO ================= */
+@media (max-width: 700px) {
+  .add-cat-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .generic-select,
+  .add-cat-btn,
+  .add-cat-box input {
+    width: 100%;
+  }
+
+  .prio-select {
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topnav {
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .wrap,
+  .admin-wrap,
+  .users-wrap {
+    padding: 18px 10px 36px;
+  }
+
+  .auth-card {
+    padding: 28px 20px;
+  }
+
+  .auth-title {
+    font-size: 23px;
+  }
+
+  .prog-bar-wrap {
+    flex-wrap: wrap;
+  }
+
+  .admin-sec-head,
+  .sec-head,
+  .user-row {
+    align-items: flex-start;
+  }
+}

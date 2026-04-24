@@ -7,7 +7,7 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
   onAuthStateChanged, updateProfile, updatePassword
 } from './firebase.js';
-import { qs, showErr, clearErr, toast, loader, showScreen, switchTab, showView } from './ui.js';
+import { qs, showErr, clearErr, toast, loader, showScreen, switchTab, showView, setAdminUI } from './ui.js';
 import { renderChecklist, syncChecklistItem, totalItems } from './views/checklist.js';
 import { renderAdmin, renderAdminItems, toggleAdminSec, nextCategoryColor } from './views/admin.js';
 import { renderUsersList } from './views/users.js';
@@ -21,6 +21,8 @@ let curriculum = [];
 let progress = {};
 let adminSections = [];
 let draggedSectionIndex = null;
+let editingUserId = null;
+let openCourseBoxes = new Set(); // rastreia quais caixas de cursos estão abertas
 
 // ============================================
 // AUTENTICAÇÃO
@@ -38,6 +40,18 @@ function bindStaticEvents() {
   });
 
   qs('auth-btn')?.addEventListener('click', doAuth);
+  
+  // Adicionar tecla Enter para submeter formulários de autenticação
+  const authInputs = ['inp-email', 'inp-pass', 'inp-pass-confirm', 'inp-name', 'inp-course'];
+  authInputs.forEach(id => {
+    qs(id)?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        qs('auth-btn')?.click();
+      }
+    });
+  });
+  
   qs('logout-btn')?.addEventListener('click', doLogout);
   qs('nav-admin-btn')?.addEventListener('click', () => openView('admin'));
   qs('nav-users-btn')?.addEventListener('click', () => openView('users'));
@@ -56,6 +70,7 @@ async function doAuth() {
   const pass = qs('inp-pass')?.value || '';
   const passConfirm = qs('inp-pass-confirm')?.value || '';
   const name = qs('inp-name')?.value.trim() || '';
+  const course = qs('inp-course')?.value || '';
   const isReg = qs('tab-reg')?.classList.contains('on');
   const btn = qs('auth-btn');
 
@@ -66,6 +81,10 @@ async function doAuth() {
   if (isReg) {
     if (!name) {
       return showErr('Preencha seu nome.');
+    }
+
+    if (!course) {
+      return showErr('Selecione seu curso.');
     }
 
     if (pass.length < 6) {
@@ -92,6 +111,7 @@ async function doAuth() {
         email,
         name: name || email.split('@')[0],
         isAdmin: false,
+        course,
         progress: {}
       });
     } else {
@@ -118,6 +138,10 @@ function updateAuthModeUI() {
 
   if (qs('name-field')) {
     qs('name-field').style.display = isReg ? 'block' : 'none';
+  }
+
+  if (qs('course-field')) {
+    qs('course-field').style.display = isReg ? 'block' : 'none';
   }
 
   if (qs('confirm-pass-field')) {
@@ -191,6 +215,7 @@ async function saveAccountData() {
   const newName = qs('account-name-input')?.value.trim() || '';
   const newPass = qs('account-pass-input')?.value || '';
   const confirmPass = qs('account-pass-confirm-input')?.value || '';
+  const newCourse = qs('account-course')?.value || '';
 
   if (errBox) {
     errBox.style.display = 'none';
@@ -227,7 +252,10 @@ async function saveAccountData() {
     }
 
     await updateProfile(currentUser, { displayName: newName });
-    await updateDoc(doc(db, 'users', currentUser.uid), { name: newName });
+    await updateDoc(doc(db, 'users', currentUser.uid), {
+      name: newName,
+      course: newCourse
+    });
 
     if (newPass) {
       await updatePassword(currentUser, newPass);
@@ -235,6 +263,7 @@ async function saveAccountData() {
 
     if (userDoc) {
       userDoc.name = newName;
+      userDoc.course = newCourse;
     }
 
     if (qs('nav-user-email')) {
@@ -243,6 +272,9 @@ async function saveAccountData() {
 
     if (qs('account-name-input')) {
       qs('account-name-input').value = newName;
+    }
+    if (qs('account-course')) {
+      qs('account-course').value = newCourse;
     }
 
     if (qs('account-pass-input')) {
@@ -256,6 +288,13 @@ async function saveAccountData() {
     if (qs('account-dropdown')) {
       qs('account-dropdown').classList.remove('open');
     }
+
+    // re-aplica filtro do checklist com o novo curso
+    initChecklistCourseFilter({
+      ...userDoc,
+      name: newName,
+      course: newCourse
+    });
 
     toast('Dados atualizados com sucesso!', true);
   } catch (e) {
@@ -285,6 +324,13 @@ async function loadCurriculum() {
     curriculum = [];
     await setDoc(ref, { sections: [] });
   }
+
+  // garante que sempre exista um array de courses
+  curriculum.forEach(sec => {
+    if (!Array.isArray(sec.courses)) {
+      sec.courses = [];
+    }
+  });
 }
 
 async function saveProgress() {
@@ -355,6 +401,54 @@ async function toggleItem(id, si) {
 }
 
 // ============================================
+// FILTRO POR CURSO NA CHECKLIST
+// ============================================
+
+function applyCourseFilter(courseValue, isAdmin) {
+  const filtered =
+    !courseValue || isAdmin
+      ? curriculum
+      : curriculum.filter(
+          sec =>
+            Array.isArray(sec.courses) &&
+            (sec.courses.includes('__ALL__') ||
+             sec.courses.includes(courseValue))
+        );
+
+  renderChecklist(filtered, progress, toggleItem);
+
+  if (!filtered.length && qs('sections-container')) {
+    qs('sections-container').innerHTML = `
+      <div class="section">
+        <div class="sec-head">
+          <span class="sec-title">Nenhuma matéria para este curso</span>
+        </div>
+        <div class="items">
+          <div class="item">
+            <span class="item-text">
+              Ajuste o filtro de curso ou peça para o admin associar matérias a este curso.
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function initChecklistCourseFilter(userData) {
+  const isAdmin = !!userData.isAdmin;
+  const userCourse = userData.course || '';
+
+  if (isAdmin) {
+    // Admin sempre vê tudo
+    applyCourseFilter('', true);
+  } else {
+    // Aluno vê só matérias do curso dele
+    applyCourseFilter(userCourse, false);
+  }
+}
+
+// ============================================
 // ADMINISTRAÇÃO
 // ============================================
 
@@ -371,7 +465,30 @@ function openView(view) {
   }
 }
 
+function saveOpenCourseBoxesState() {
+  openCourseBoxes.clear();
+  document.querySelectorAll('.admin-courses-row.open').forEach(row => {
+    const id = row.id; // admin-courses-{si}
+    const si = id.replace('admin-courses-', '');
+    openCourseBoxes.add(parseInt(si));
+  });
+}
+
+function restoreOpenCourseBoxesState() {
+  openCourseBoxes.forEach(si => {
+    const row = qs(`admin-courses-${si}`);
+    if (row) {
+      row.classList.add('open');
+      const arrow = document.querySelector(`[data-courses-toggle="${si}"] .arrow-icon`);
+      if (arrow) {
+        arrow.textContent = '▴';
+      }
+    }
+  });
+}
+
 function renderAdminView() {
+  saveOpenCourseBoxesState();
   renderAdmin(adminSections, {
     toggleAdminSec,
     updatePrio: (si, val) => { adminSections[si].prio = val; },
@@ -379,11 +496,43 @@ function renderAdminView() {
     addItem,
     editItem,
     removeItem,
+    toggleSectionCourse,
     onDragStart,
     onDragOver,
     onDrop,
     onDragEnd
   });
+  restoreOpenCourseBoxesState();
+}
+
+function toggleSectionCourse(si, courseId, checked) {
+  const sec = adminSections[si];
+  if (!Array.isArray(sec.courses)) {
+    sec.courses = [];
+  }
+
+  if (courseId === '__ALL__') {
+    if (checked) {
+      sec.courses = ['__ALL__'];
+    } else {
+      sec.courses = [];
+    }
+  } else {
+    // se estava em "Todos", remove esse estado
+    sec.courses = sec.courses.filter(c => c !== '__ALL__');
+
+    if (checked) {
+      if (!sec.courses.includes(courseId)) {
+        sec.courses.push(courseId);
+      }
+    } else {
+      sec.courses = sec.courses.filter(c => c !== courseId);
+    }
+  }
+
+  // re-render para atualizar os checkboxes na tela
+  // (a função renderAdminView salva/restaura o estado das caixas abertas)
+  renderAdminView();
 }
 
 function removeSection(e, si) {
@@ -440,7 +589,8 @@ function addCategory() {
     cat: name,
     color: nextCategoryColor(adminSections.length),
     prio,
-    items: []
+    items: [],
+    courses: []
   });
 
   if (qs('new-cat-input')) {
@@ -472,10 +622,176 @@ async function loadUsersView() {
   try {
     const snap = await getDocs(collection(db, 'users'));
     const users = [];
-    snap.forEach(d => users.push(d.data()));
-    renderUsersList(users, totalItems(curriculum));
+    snap.forEach(d => users.push({ uid: d.id, ...d.data() }));
+    renderUsersList(users, totalItems(curriculum), {
+      onEditUser,
+      onRemoveUser
+    });
   } catch {
     cont.innerHTML = '<p class="muted-msg">Erro ao carregar usuários.</p>';
+  }
+}
+
+// abrir modal de edição
+async function onEditUser(uid) {
+  const ref = doc(db, 'users', uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    toast('Usuário não encontrado.');
+    return;
+  }
+
+  const data = snap.data();
+  openEditUserModal({ uid, ...data });
+}
+
+// remover usuário (marcando como desabilitado)
+async function onRemoveUser(uid) {
+  if (!confirm('Remover este usuário? Essa ação não pode ser desfeita.')) return;
+
+  try {
+    await updateDoc(doc(db, 'users', uid), { disabled: true });
+    toast('Usuário removido (desabilitado).', true);
+    loadUsersView();
+  } catch {
+    toast('Erro ao remover usuário.');
+  }
+}
+
+// ============================================
+// MODAL DE EDIÇÃO DE USUÁRIO
+// ============================================
+
+function openEditUserModal(user) {
+  editingUserId = user.uid;
+
+  const modal = qs('edit-user-modal');
+  if (!modal) return;
+
+  const nameInp = qs('edit-user-name');
+  const courseSel = qs('edit-user-course');
+  const adminCheckbox = qs('edit-user-is-admin');
+  const adminField = qs('edit-user-admin-field');
+
+  if (nameInp) nameInp.value = user.name || '';
+  if (courseSel) courseSel.value = user.course || '';
+  if (adminCheckbox) adminCheckbox.checked = user.isAdmin || false;
+
+  // Mostrar campo de admin apenas se o usuário logado é admin
+  if (adminField) {
+    adminField.style.display = (userDoc && userDoc.isAdmin) ? 'block' : 'none';
+  }
+
+  modal.style.display = 'flex';
+}
+
+function closeEditUserModal() {
+  const modal = qs('edit-user-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  editingUserId = null;
+}
+
+async function saveEditedUser() {
+  if (!editingUserId) {
+    closeEditUserModal();
+    return;
+  }
+
+  // Validar que apenas admins podem salvar mudanças de admin
+  if (!userDoc || !userDoc.isAdmin) {
+    toast('Apenas administradores podem editar usuários.');
+    closeEditUserModal();
+    return;
+  }
+
+  const nameInp = qs('edit-user-name');
+  const courseSel = qs('edit-user-course');
+  const adminCheckbox = qs('edit-user-is-admin');
+
+  const newName = (nameInp?.value || '').trim();
+  const newCourse = (courseSel?.value || '').trim();
+  const newIsAdmin = adminCheckbox?.checked || false;
+
+  if (!newName) {
+    toast('Informe o nome do aluno.');
+    return;
+  }
+
+  const ref = doc(db, 'users', editingUserId);
+
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      toast('Usuário não encontrado.');
+      closeEditUserModal();
+      return;
+    }
+    const data = snap.data();
+
+    await updateDoc(ref, {
+      name: newName || data.name,
+      course: newCourse,
+      isAdmin: newIsAdmin
+    });
+
+    toast('Dados do aluno atualizados.', true);
+
+    // se for o próprio usuário logado, atualiza cache/local
+    if (currentUser && currentUser.uid === editingUserId) {
+      if (userDoc) {
+        userDoc.name = newName || data.name;
+        userDoc.course = newCourse;
+        userDoc.isAdmin = newIsAdmin;
+      }
+      if (qs('nav-user-email')) {
+        qs('nav-user-email').textContent = newName || data.name;
+      }
+      if (qs('account-name-input')) {
+        qs('account-name-input').value = newName || data.name;
+      }
+      if (qs('account-course')) {
+        qs('account-course').value = newCourse;
+      }
+      initChecklistCourseFilter({
+        ...userDoc,
+        name: newName || data.name,
+        course: newCourse,
+        isAdmin: newIsAdmin
+      });
+      // Recarregar a UI de admin se a mudança for aplicada ao próprio usuário
+      if (newIsAdmin !== data.isAdmin) {
+        setAdminUI(newIsAdmin);
+      }
+    }
+
+    closeEditUserModal();
+    loadUsersView();
+  } catch {
+    toast('Erro ao atualizar dados do aluno.');
+  }
+}
+
+function bindEditUserModalEvents() {
+  const cancelBtn = qs('edit-user-cancel');
+  const saveBtn = qs('edit-user-save');
+  const backdrop = qs('edit-user-modal');
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeEditUserModal);
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', e => {
+      if (e.target === backdrop) {
+        closeEditUserModal();
+      }
+    });
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveEditedUser);
   }
 }
 
@@ -505,12 +821,14 @@ onAuthStateChanged(auth, async (user) => {
       qs('account-dropdown').classList.remove('open');
     }
 
-    // limpa os campos da conta quando sair
     if (qs('account-email')) {
       qs('account-email').value = '';
     }
     if (qs('account-name-input')) {
       qs('account-name-input').value = '';
+    }
+    if (qs('account-course')) {
+      qs('account-course').value = '';
     }
     if (qs('account-pass-input')) {
       qs('account-pass-input').value = '';
@@ -532,6 +850,7 @@ onAuthStateChanged(auth, async (user) => {
       email: user.email,
       name: user.displayName || user.email.split('@')[0],
       isAdmin: ADMIN_EMAILS.includes(user.email),
+      course: '',
       progress: {}
     });
   }
@@ -551,13 +870,15 @@ onAuthStateChanged(auth, async (user) => {
     qs('nav-user-email').textContent = data.name;
   }
 
-  // aqui preenche o EMAIL da pessoa logada
   if (qs('account-email')) {
     qs('account-email').value = user.email || data.email || '';
   }
 
   if (qs('account-name-input')) {
     qs('account-name-input').value = data.name;
+  }
+  if (qs('account-course')) {
+    qs('account-course').value = data.course || '';
   }
   if (qs('account-pass-input')) {
     qs('account-pass-input').value = '';
@@ -573,7 +894,9 @@ onAuthStateChanged(auth, async (user) => {
     qs('nav-users-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
   }
 
-  renderChecklistView();
+  // inicializa checklist com filtro de curso
+  initChecklistCourseFilter(data);
+
   showScreen('app-screen');
   loader(false);
   clearErr();
@@ -628,5 +951,6 @@ function onDragEnd(e) {
 // ============================================
 bindStaticEvents();
 bindAccountMenuEvents();
+bindEditUserModalEvents();
 updateAuthModeUI();
 loader(true);
