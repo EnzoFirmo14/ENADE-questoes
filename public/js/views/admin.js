@@ -130,16 +130,6 @@ export function renderAdmin(adminSections, handlers) {
         <label class="pill-check">
           <input
             type="checkbox"
-            data-course="ES (Engenharia de Software)"
-            data-sec="${si}"
-            ${courses.includes('ES (Engenharia de Software)') ? 'checked' : ''}
-          >
-          <span>ES (Engenharia de Software)</span>
-        </label>
-
-        <label class="pill-check">
-          <input
-            type="checkbox"
             data-course="EC (Engenharia da Computação)"
             data-sec="${si}"
             ${courses.includes('EC (Engenharia da Computação)') ? 'checked' : ''}
