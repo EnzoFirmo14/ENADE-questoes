@@ -234,7 +234,7 @@
   padding: 11px 12px;
   border-radius: 10px;
   background: rgba(124, 110, 245, 0.04);
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   border: 1px solid rgba(124, 110, 245, 0.08);
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -242,9 +242,6 @@
 .admin-item-row:hover {
   background: rgba(124, 110, 245, 0.08);
   border-color: rgba(124, 110, 245, 0.15);
-}
-  margin-bottom: 7px;
-  border: 1px solid var(--border);
 }
 
 .admin-item-txt {
@@ -351,6 +348,7 @@
 }
 
 /* ================= ADMIN DRAG & DROP ================= */
+
 .admin-sec {
   cursor: grab;
   cursor: -webkit-grab;
@@ -427,7 +425,7 @@
   display: none;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;          /* quebra automática para mobile */
+  flex-wrap: wrap;
   gap: 0.5rem;
   padding: 0 1rem 0.75rem;
   position: relative;
