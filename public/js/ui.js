@@ -100,7 +100,7 @@ export function switchTab(tab) {
  * Exibe uma visualização (checklist, admin, users)
  */
 export function showView(view) {
-  ['checklist', 'admin', 'users'].forEach((id) => {
+  ['checklist', 'flashcards', 'admin', 'users'].forEach((id) => {
     const el = qs('view-' + id);
     if (!el) return;
 
@@ -185,4 +185,132 @@ export function toggleEl(id, show = true, display = '') {
   if (!el) return;
 
   el.style.display = show ? display : 'none';
+}
+
+/**
+ * Define estado de carregamento em um botão
+ */
+export function setButtonLoading(id, loading = true) {
+  const btn = qs(id);
+  if (!btn) return;
+
+  btn.disabled = loading;
+  btn.classList.toggle('btn-loading', loading);
+  
+  if (loading) {
+    btn.dataset.originalText = btn.textContent;
+  } else {
+    btn.textContent = btn.dataset.originalText || btn.textContent;
+  }
+}
+
+/**
+ * Marca um campo como válido ou inválido
+ */
+export function setFieldState(fieldId, state = 'normal', errorMsg = '') {
+  const field = qs(fieldId)?.closest('.field') || qs(fieldId)?.parentElement?.closest('.field');
+  if (!field) return;
+
+  field.className = field.className.replace(/\s*(error|success)/g, '');
+  
+  if (state === 'error') {
+    field.classList.add('error');
+    const errorEl = field.querySelector('.field-error-msg');
+    if (errorEl) {
+      errorEl.textContent = errorMsg;
+    }
+  } else if (state === 'success') {
+    field.classList.add('success');
+  }
+}
+
+/**
+ * Valida email
+ */
+export function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+/**
+ * Valida senha mínima (6 caracteres)
+ */
+export function isValidPassword(password) {
+  return password && password.length >= 6;
+}
+
+/**
+ * Valida campo obrigatório
+ */
+export function isFieldFilled(value) {
+  return value && value.toString().trim().length > 0;
+}
+
+/**
+ * Limpa estado de validação de um campo
+ */
+export function clearFieldState(fieldId) {
+  const field = qs(fieldId)?.closest('.field') || qs(fieldId)?.parentElement?.closest('.field');
+  if (!field) return;
+
+  field.className = field.className.replace(/\s*(error|success)/g, '');
+  const errorEl = field?.querySelector('.field-error-msg');
+  if (errorEl) {
+    errorEl.textContent = '';
+  }
+}
+
+/**
+ * Exibe notificação de alerta
+ */
+export function showAlert(message, type = 'info') {
+  const container = document.createElement('div');
+  container.className = `alert ${type}`;
+  container.innerHTML = `
+    <div class="alert-icon">
+      ${type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'warning' ? '⚠' : 'ℹ'}
+    </div>
+    <div class="alert-content">${message}</div>
+  `;
+  
+  const main = qs('app-screen') || document.body;
+  main.insertBefore(container, main.firstChild);
+  
+  setTimeout(() => {
+    container.style.opacity = '0';
+    setTimeout(() => container.remove(), 300);
+  }, 4000);
+}
+
+/**
+ * Habilita/desabilita todos os inputs em um container
+ */
+export function setFormDisabled(formId, disabled = true) {
+  const form = qs(formId);
+  if (!form) return;
+
+  const inputs = form.querySelectorAll('input, select, textarea, button');
+  inputs.forEach(input => {
+    if (input.tagName !== 'BUTTON' || !input.classList.contains('btn-primary')) {
+      input.disabled = disabled;
+    }
+  });
+}
+
+/**
+ * Reseta todos os campos de um formulário
+ */
+export function resetForm(formId) {
+  const form = qs(formId);
+  if (!form) return;
+
+  const inputs = form.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    if (input.type === 'checkbox' || input.type === 'radio') {
+      input.checked = false;
+    } else {
+      input.value = '';
+    }
+    clearFieldState(input.id);
+  });
 }

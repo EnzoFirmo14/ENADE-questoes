@@ -3,14 +3,16 @@
 // ============================================
 import { ADMIN_EMAILS } from './constants.js';
 import {
-  auth, db, doc, getDoc, setDoc, updateDoc, collection, getDocs,
+  auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
   onAuthStateChanged, updateProfile, updatePassword
 } from './firebase.js';
 import { qs, showErr, clearErr, toast, loader, showScreen, switchTab, showView, setAdminUI } from './ui.js';
 import { renderChecklist, syncChecklistItem, totalItems } from './views/checklist.js';
 import { renderAdmin, renderAdminItems, toggleAdminSec, nextCategoryColor } from './views/admin.js';
+import { renderFlashcardsView } from './views/flashcards.js';
 import { renderUsersList } from './views/users.js';
+import { initCustomSelect } from './customSelect.js';
 
 // ============================================
 // VARIÁVEIS GLOBAIS
@@ -20,9 +22,11 @@ let userDoc = null;
 let curriculum = [];
 let progress = {};
 let adminSections = [];
+let flashcards = [];
 let draggedSectionIndex = null;
 let editingUserId = null;
 let openCourseBoxes = new Set(); // rastreia quais caixas de cursos estão abertas
+
 
 // ============================================
 // AUTENTICAÇÃO
@@ -40,7 +44,7 @@ function bindStaticEvents() {
   });
 
   qs('auth-btn')?.addEventListener('click', doAuth);
-  
+
   // Adicionar tecla Enter para submeter formulários de autenticação
   const authInputs = ['inp-email', 'inp-pass', 'inp-pass-confirm', 'inp-name', 'inp-course'];
   authInputs.forEach(id => {
@@ -51,11 +55,12 @@ function bindStaticEvents() {
       }
     });
   });
-  
+
   qs('logout-btn')?.addEventListener('click', doLogout);
   qs('nav-admin-btn')?.addEventListener('click', () => openView('admin'));
   qs('nav-users-btn')?.addEventListener('click', () => openView('users'));
   qs('nav-checklist-btn')?.addEventListener('click', () => openView('checklist'));
+  qs('nav-flashcards-btn')?.addEventListener('click', () => openView('flashcards'));
   qs('reset-progress-btn')?.addEventListener('click', resetProgress);
   qs('save-btn')?.addEventListener('click', saveCurriculum);
   qs('add-cat-btn')?.addEventListener('click', addCategory);
@@ -171,6 +176,7 @@ function togglePassword(btn) {
 async function doLogout() {
   await signOut(auth);
 }
+
 
 // ============================================
 // MENU DE CONTA
@@ -310,6 +316,7 @@ async function saveAccountData() {
   }
 }
 
+
 // ============================================
 // CURRÍCULO E PROGRESSO
 // ============================================
@@ -369,6 +376,7 @@ async function resetProgress() {
   toast('Progresso reiniciado');
 }
 
+
 // ============================================
 // NAVEGAÇÃO E VISUALIZAÇÃO
 // ============================================
@@ -399,6 +407,7 @@ async function toggleItem(id, si) {
   syncChecklistItem(curriculum, progress, id, si);
   await saveProgress();
 }
+
 
 // ============================================
 // FILTRO POR CURSO NA CHECKLIST
@@ -448,8 +457,46 @@ function initChecklistCourseFilter(userData) {
   }
 }
 
+//=============================================
+// FLASHCARDS
 // ============================================
-// ADMINISTRAÇÃO
+
+async function loadFlashcards() {
+  const snap = await getDocs(collection(db, 'flashcards'));
+  flashcards = [];
+  snap.forEach(d => flashcards.push({ id: d.id, ...d.data() }));
+}
+
+async function createFlashcard(sectionIndex, question, answer) {
+  if (!currentUser) return;
+  const ref = collection(db, 'flashcards');
+  await addDoc(ref, {
+    sectionIndex,
+    question,
+    answer,
+    createdBy: currentUser.uid,
+    createdAt: Date.now()
+  });
+  await loadFlashcards();
+}
+
+async function updateFlashcard(id, question, answer) {
+  if (!id) return;
+  await updateDoc(doc(db, 'flashcards', id), {
+    question,
+    answer
+  });
+  await loadFlashcards();
+}
+
+async function deleteFlashcardById(id) {
+  if (!id) return;
+  await deleteDoc(doc(db, 'flashcards', id));
+  await loadFlashcards();
+}
+
+// ============================================
+// ADMINISTRAÇÃO / VIEWS
 // ============================================
 
 function openView(view) {
@@ -462,6 +509,42 @@ function openView(view) {
 
   if (view === 'users') {
     loadUsersView();
+  }
+
+  if (view === 'flashcards') {
+    const renderFlashcardsPage = async (sectionIndex = 0, cardIndex = 0) => {
+      renderFlashcardsView(curriculum, flashcards, {
+        currentSectionId: sectionIndex,
+        currentCardIndex: cardIndex,
+        isAdmin: userDoc?.isAdmin,
+        onChangeSection: (idx) => renderFlashcardsPage(idx, 0),
+        onCreateCard: userDoc?.isAdmin
+          ? async (idx, question, answer) => {
+              await createFlashcard(idx, question, answer);
+              renderFlashcardsPage(idx, 0);
+            }
+          : null,
+        onEditCard: userDoc?.isAdmin
+          ? async (id, question, answer) => {
+              await updateFlashcard(id, question, answer);
+              renderFlashcardsPage(sectionIndex, cardIndex);
+            }
+          : null,
+        onDeleteCard: userDoc?.isAdmin
+          ? async (id) => {
+              await deleteFlashcardById(id);
+              renderFlashcardsPage(sectionIndex, 0);
+            }
+          : null,
+        onChangeCard: async (idx) => renderFlashcardsPage(sectionIndex, idx)
+      });
+    };
+
+    renderFlashcardsPage(0, 0);
+  }
+
+  if (view === 'checklist') {
+    renderChecklistView();
   }
 }
 
@@ -489,6 +572,7 @@ function restoreOpenCourseBoxesState() {
 
 function renderAdminView() {
   saveOpenCourseBoxesState();
+
   renderAdmin(adminSections, {
     toggleAdminSec,
     updatePrio: (si, val) => { adminSections[si].prio = val; },
@@ -502,6 +586,20 @@ function renderAdminView() {
     onDrop,
     onDragEnd
   });
+
+  // inicializa os custom selects de prioridade
+  document.querySelectorAll('[data-prio-select]').forEach(el => {
+    const si = Number(el.getAttribute('data-prio-select'));
+    const currentPrio = adminSections[si]?.prio || 'obrigatório';
+
+    initCustomSelect(el, {
+      value: currentPrio,
+      onChange: (newVal) => {
+        adminSections[si].prio = newVal;
+      }
+    });
+  });
+
   restoreOpenCourseBoxesState();
 }
 
@@ -530,8 +628,6 @@ function toggleSectionCourse(si, courseId, checked) {
     }
   }
 
-  // re-render para atualizar os checkboxes na tela
-  // (a função renderAdminView salva/restaura o estado das caixas abertas)
   renderAdminView();
 }
 
@@ -609,6 +705,7 @@ function addCategory() {
   toast('Categoria criada. Agora adicione os assuntos.');
 }
 
+
 // ============================================
 // VISUALIZAÇÃO DE USUÁRIOS
 // ============================================
@@ -657,6 +754,7 @@ async function onRemoveUser(uid) {
     toast('Erro ao remover usuário.');
   }
 }
+
 
 // ============================================
 // MODAL DE EDIÇÃO DE USUÁRIO
@@ -795,6 +893,7 @@ function bindEditUserModalEvents() {
   }
 }
 
+
 // ============================================
 // AUTENTICAÇÃO - MONITORAMENTO DE ESTADO
 // ============================================
@@ -806,6 +905,7 @@ onAuthStateChanged(auth, async (user) => {
     progress = {};
     curriculum = [];
     adminSections = [];
+    flashcards = [];
 
     showScreen('auth-screen');
     loader(false);
@@ -837,6 +937,10 @@ onAuthStateChanged(auth, async (user) => {
       qs('account-pass-confirm-input').value = '';
     }
 
+    if (qs('nav-flashcards-btn')) {
+      qs('nav-flashcards-btn').style.display = 'none';
+    }
+
     return;
   }
 
@@ -865,6 +969,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await loadCurriculum();
+  await loadFlashcards();
 
   if (qs('nav-user-email')) {
     qs('nav-user-email').textContent = data.name;
@@ -893,6 +998,9 @@ onAuthStateChanged(auth, async (user) => {
   if (qs('nav-users-btn')) {
     qs('nav-users-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
   }
+  if (qs('nav-flashcards-btn')) {
+    qs('nav-flashcards-btn').style.display = 'inline-flex';
+  }
 
   // inicializa checklist com filtro de curso
   initChecklistCourseFilter(data);
@@ -906,6 +1014,7 @@ onAuthStateChanged(auth, async (user) => {
     qs('auth-btn').textContent = 'Entrar';
   }
 });
+
 
 // ============================================
 // DRAG AND DROP PARA REORDENAR CATEGORIAS
@@ -945,6 +1054,7 @@ function onDragEnd(e) {
   e.currentTarget.classList.remove('dragging');
   draggedSectionIndex = null;
 }
+
 
 // ============================================
 // INICIALIZAÇÃO

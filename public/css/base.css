@@ -123,6 +123,10 @@ button {
   padding: 8px 12px;
 }
 
+.field select option:hover {
+  background: rgba(124, 110, 245, 0.1);
+}
+
 .field select option:checked {
   background: linear-gradient(rgba(124, 110, 245, 0.3), rgba(124, 110, 245, 0.3));
   color: var(--text);

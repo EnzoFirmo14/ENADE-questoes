@@ -91,3 +91,306 @@
 .checkbox-label span {
   user-select: none;
 }
+
+/* ================= FIELD SELECT ================= */
+.fc-custom-select--small .fc-select-trigger {
+  min-height: 36px;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+/* ================= FORM VALIDATION ================= */
+.field.error input,
+.field.error select,
+.field.error textarea {
+  border-color: var(--danger);
+  background: rgba(245, 101, 101, 0.05);
+}
+
+.field.error input:focus,
+.field.error select:focus,
+.field.error textarea:focus {
+  box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+  border-color: var(--danger);
+}
+
+.field.success input,
+.field.success select,
+.field.success textarea {
+  border-color: var(--success);
+  background: rgba(34, 217, 146, 0.05);
+}
+
+.field.success input:focus,
+.field.success select:focus,
+.field.success textarea:focus {
+  box-shadow: 0 0 0 3px rgba(34, 217, 146, 0.1);
+  border-color: var(--success);
+}
+
+.field-error-msg {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+  display: none;
+}
+
+.field.error .field-error-msg {
+  display: block;
+}
+
+.field-help-text {
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ================= LOADING STATE ================= */
+.btn-loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  top: 50%;
+  left: 50%;
+  margin-left: -7px;
+  margin-top: -7px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: currentColor;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================= BADGE ================= */
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(124, 110, 245, 0.1);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.badge.primary {
+  background: rgba(124, 110, 245, 0.15);
+  color: var(--accent2);
+}
+
+.badge.success {
+  background: rgba(34, 217, 146, 0.1);
+  color: var(--success);
+}
+
+.badge.warning {
+  background: rgba(245, 158, 66, 0.1);
+  color: var(--warn);
+}
+
+.badge.danger {
+  background: rgba(245, 101, 101, 0.1);
+  color: var(--danger);
+}
+
+/* ================= DIVIDER ================= */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  margin: 16px 0;
+}
+
+.divider.subtle {
+  background: linear-gradient(90deg, transparent, rgba(107, 117, 144, 0.3) 20%, rgba(107, 117, 144, 0.3) 80%, transparent);
+}
+
+/* ================= ALERT BOX ================= */
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border-left: 3px solid;
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.alert.info {
+  background: rgba(124, 110, 245, 0.1);
+  border-left-color: var(--accent);
+  color: var(--accent2);
+}
+
+.alert.success {
+  background: rgba(34, 217, 146, 0.1);
+  border-left-color: var(--success);
+  color: var(--success);
+}
+
+.alert.warning {
+  background: rgba(245, 158, 66, 0.1);
+  border-left-color: var(--warn);
+  color: var(--warn);
+}
+
+.alert.error {
+  background: rgba(245, 101, 101, 0.1);
+  border-left-color: var(--danger);
+  color: var(--danger);
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+/* ================= PROGRESS INDICATOR ================= */
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.progress-step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.progress-step.active .progress-step-number {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-color: var(--accent2);
+  box-shadow: 0 4px 12px rgba(124, 110, 245, 0.3);
+}
+
+.progress-step.completed .progress-step-number {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+/* ================= TOOLTIP ================= */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface2);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 100;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+[data-tooltip]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 119%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--surface2);
+  z-index: 100;
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ================= LINK STYLES ================= */
+a {
+  color: var(--accent2);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  filter: brightness(1.1);
+}
+
+a:active {
+  filter: brightness(0.95);
+}
+
+/* ================= FOCUS VISIBLE ================= */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ================= SMOOTH TRANSITIONS ================= */
+* {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+button,
+input,
+select,
+textarea,
+a,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

@@ -12,6 +12,9 @@
 @import url('./admin.css');
 @import url('./users.css');
 @import url('./components.css');
+@import url('./custom-select.css');
+@import url('./flashcards.css');
+@import url('./design-system.css');
 
 /* Responsive styles (must come last) */
 @import url('./responsive.css');

@@ -1,0 +1,131 @@
+/* ================= CUSTOM SELECT COMPONENT ================= */
+
+.fc-custom-select {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.fc-select-trigger {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c6ef5' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 18px;
+  padding-right: 44px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.fc-select-trigger:hover {
+  border-color: rgba(124, 110, 245, 0.5);
+  background-color: rgba(124, 110, 245, 0.03);
+}
+
+.fc-select-trigger:focus {
+  border-color: var(--accent);
+  background-color: rgba(124, 110, 245, 0.08);
+  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.12), inset 0 0 0 0.5px rgba(124, 110, 245, 0.2);
+}
+
+.fc-select-value {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-select-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+  max-height: 220px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.fc-custom-select.open .fc-select-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.fc-select-option {
+  padding: 12px 16px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: center;
+}
+
+.fc-select-option:hover {
+  background: rgba(124, 110, 245, 0.1);
+  color: var(--text);
+}
+
+.fc-select-option.active {
+  background: rgba(124, 110, 245, 0.15);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+.fc-select-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fc-select-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fc-select-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(124, 110, 245, 0.2);
+  border-radius: 3px;
+}
+
+.fc-select-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 110, 245, 0.4);
+}
+
+/* Variação pequena (para formulários menores) */
+.fc-custom-select--small .fc-select-trigger {
+  padding: 9px 12px;
+  font-size: 13px;
+  min-height: auto;
+}
+
+.fc-custom-select--small .fc-select-dropdown {
+  max-height: 180px;
+}
+
+.fc-custom-select--small .fc-select-option {
+  padding: 9px 12px;
+  font-size: 13px;
+}
