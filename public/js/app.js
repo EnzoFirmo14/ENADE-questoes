@@ -7,7 +7,10 @@ import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
   onAuthStateChanged, updateProfile, updatePassword
 } from './firebase.js';
-import { qs, showErr, clearErr, toast, loader, showScreen, switchTab, showView, setAdminUI } from './ui.js';
+import {
+  qs, showErr, clearErr, toast, loader,
+  showScreen, switchTab, showView, setAdminUI
+} from './ui.js';
 import { renderChecklist, syncChecklistItem, totalItems } from './views/checklist.js';
 import { renderAdmin, renderAdminItems, toggleAdminSec, nextCategoryColor } from './views/admin.js';
 import { renderFlashcardsView } from './views/flashcards.js';
@@ -25,13 +28,11 @@ let adminSections = [];
 let flashcards = [];
 let draggedSectionIndex = null;
 let editingUserId = null;
-let openCourseBoxes = new Set(); // rastreia quais caixas de cursos estão abertas
-
+let openCourseBoxes = new Set();
 
 // ============================================
 // AUTENTICAÇÃO
 // ============================================
-
 function bindStaticEvents() {
   qs('tab-login')?.addEventListener('click', () => {
     switchTab('login');
@@ -45,7 +46,6 @@ function bindStaticEvents() {
 
   qs('auth-btn')?.addEventListener('click', doAuth);
 
-  // Adicionar tecla Enter para submeter formulários de autenticação
   const authInputs = ['inp-email', 'inp-pass', 'inp-pass-confirm', 'inp-name', 'inp-course'];
   authInputs.forEach(id => {
     qs(id)?.addEventListener('keydown', (e) => {
@@ -79,6 +79,8 @@ async function doAuth() {
   const isReg = qs('tab-reg')?.classList.contains('on');
   const btn = qs('auth-btn');
 
+  console.log('[doAuth] chamado, isReg =', isReg, 'email =', email);
+
   if (!email || !pass) {
     return showErr('Preencha email e senha.');
   }
@@ -101,6 +103,11 @@ async function doAuth() {
     }
   }
 
+  if (!btn) {
+    console.warn('[doAuth] Botão auth-btn não encontrado');
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = '...';
 
@@ -115,14 +122,23 @@ async function doAuth() {
       await setDoc(doc(db, 'users', cred.user.uid), {
         email,
         name: name || email.split('@')[0],
-        isAdmin: false,
+        isAdmin: ADMIN_EMAILS.includes(email),
         course,
         progress: {}
       });
+
+      console.log('[doAuth] registro concluído com sucesso');
     } else {
       await signInWithEmailAndPassword(auth, email, pass);
+      console.log('[doAuth] login concluído com sucesso');
     }
+
+    toast('Login realizado com sucesso!', true);
+    // NÃO redireciona. O onAuthStateChanged abaixo cuida de trocar a tela.
+    clearErr();
   } catch (e) {
+    console.error('[doAuth] erro', e);
+
     const msgs = {
       'auth/email-already-in-use': 'Email já cadastrado.',
       'auth/wrong-password': 'Senha incorreta.',
@@ -177,11 +193,9 @@ async function doLogout() {
   await signOut(auth);
 }
 
-
 // ============================================
 // MENU DE CONTA
 // ============================================
-
 function bindAccountMenuEvents() {
   const trigger = qs('account-trigger');
   const dropdown = qs('account-dropdown');
@@ -295,7 +309,6 @@ async function saveAccountData() {
       qs('account-dropdown').classList.remove('open');
     }
 
-    // re-aplica filtro do checklist com o novo curso
     initChecklistCourseFilter({
       ...userDoc,
       name: newName,
@@ -316,11 +329,9 @@ async function saveAccountData() {
   }
 }
 
-
 // ============================================
 // CURRÍCULO E PROGRESSO
 // ============================================
-
 async function loadCurriculum() {
   const ref = doc(db, 'curriculum', 'main');
   const snap = await getDoc(ref);
@@ -332,7 +343,6 @@ async function loadCurriculum() {
     await setDoc(ref, { sections: [] });
   }
 
-  // garante que sempre exista um array de courses
   curriculum.forEach(sec => {
     if (!Array.isArray(sec.courses)) {
       sec.courses = [];
@@ -341,6 +351,7 @@ async function loadCurriculum() {
 }
 
 async function saveProgress() {
+  if (!currentUser) return;
   await updateDoc(doc(db, 'users', currentUser.uid), { progress });
 }
 
@@ -376,11 +387,9 @@ async function resetProgress() {
   toast('Progresso reiniciado');
 }
 
-
 // ============================================
 // NAVEGAÇÃO E VISUALIZAÇÃO
 // ============================================
-
 function renderChecklistView() {
   renderChecklist(curriculum, progress, toggleItem);
 
@@ -408,11 +417,9 @@ async function toggleItem(id, si) {
   await saveProgress();
 }
 
-
 // ============================================
 // FILTRO POR CURSO NA CHECKLIST
 // ============================================
-
 function applyCourseFilter(courseValue, isAdmin) {
   const filtered =
     !courseValue || isAdmin
@@ -449,10 +456,8 @@ function initChecklistCourseFilter(userData) {
   const userCourse = userData.course || '';
 
   if (isAdmin) {
-    // Admin sempre vê tudo
     applyCourseFilter('', true);
   } else {
-    // Aluno vê só matérias do curso dele
     applyCourseFilter(userCourse, false);
   }
 }
@@ -460,7 +465,6 @@ function initChecklistCourseFilter(userData) {
 //=============================================
 // FLASHCARDS
 // ============================================
-
 async function loadFlashcards() {
   const snap = await getDocs(collection(db, 'flashcards'));
   flashcards = [];
@@ -498,7 +502,6 @@ async function deleteFlashcardById(id) {
 // ============================================
 // ADMINISTRAÇÃO / VIEWS
 // ============================================
-
 function openView(view) {
   showView(view);
 
@@ -551,7 +554,7 @@ function openView(view) {
 function saveOpenCourseBoxesState() {
   openCourseBoxes.clear();
   document.querySelectorAll('.admin-courses-row.open').forEach(row => {
-    const id = row.id; // admin-courses-{si}
+    const id = row.id;
     const si = id.replace('admin-courses-', '');
     openCourseBoxes.add(parseInt(si));
   });
@@ -587,7 +590,6 @@ function renderAdminView() {
     onDragEnd
   });
 
-  // inicializa os custom selects de prioridade
   document.querySelectorAll('[data-prio-select]').forEach(el => {
     const si = Number(el.getAttribute('data-prio-select'));
     const currentPrio = adminSections[si]?.prio || 'obrigatório';
@@ -616,7 +618,6 @@ function toggleSectionCourse(si, courseId, checked) {
       sec.courses = [];
     }
   } else {
-    // se estava em "Todos", remove esse estado
     sec.courses = sec.courses.filter(c => c !== '__ALL__');
 
     if (checked) {
@@ -705,11 +706,9 @@ function addCategory() {
   toast('Categoria criada. Agora adicione os assuntos.');
 }
 
-
 // ============================================
 // VISUALIZAÇÃO DE USUÁRIOS
 // ============================================
-
 async function loadUsersView() {
   const cont = qs('users-list');
   if (!cont) return;
@@ -729,7 +728,6 @@ async function loadUsersView() {
   }
 }
 
-// abrir modal de edição
 async function onEditUser(uid) {
   const ref = doc(db, 'users', uid);
   const snap = await getDoc(ref);
@@ -742,7 +740,6 @@ async function onEditUser(uid) {
   openEditUserModal({ uid, ...data });
 }
 
-// remover usuário (marcando como desabilitado)
 async function onRemoveUser(uid) {
   if (!confirm('Remover este usuário? Essa ação não pode ser desfeita.')) return;
 
@@ -755,11 +752,9 @@ async function onRemoveUser(uid) {
   }
 }
 
-
 // ============================================
 // MODAL DE EDIÇÃO DE USUÁRIO
 // ============================================
-
 function openEditUserModal(user) {
   editingUserId = user.uid;
 
@@ -775,7 +770,6 @@ function openEditUserModal(user) {
   if (courseSel) courseSel.value = user.course || '';
   if (adminCheckbox) adminCheckbox.checked = user.isAdmin || false;
 
-  // Mostrar campo de admin apenas se o usuário logado é admin
   if (adminField) {
     adminField.style.display = (userDoc && userDoc.isAdmin) ? 'block' : 'none';
   }
@@ -797,7 +791,6 @@ async function saveEditedUser() {
     return;
   }
 
-  // Validar que apenas admins podem salvar mudanças de admin
   if (!userDoc || !userDoc.isAdmin) {
     toast('Apenas administradores podem editar usuários.');
     closeEditUserModal();
@@ -836,7 +829,6 @@ async function saveEditedUser() {
 
     toast('Dados do aluno atualizados.', true);
 
-    // se for o próprio usuário logado, atualiza cache/local
     if (currentUser && currentUser.uid === editingUserId) {
       if (userDoc) {
         userDoc.name = newName || data.name;
@@ -858,7 +850,6 @@ async function saveEditedUser() {
         course: newCourse,
         isAdmin: newIsAdmin
       });
-      // Recarregar a UI de admin se a mudança for aplicada ao próprio usuário
       if (newIsAdmin !== data.isAdmin) {
         setAdminUI(newIsAdmin);
       }
@@ -893,133 +884,9 @@ function bindEditUserModalEvents() {
   }
 }
 
-
-// ============================================
-// AUTENTICAÇÃO - MONITORAMENTO DE ESTADO
-// ============================================
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    currentUser = null;
-    userDoc = null;
-    progress = {};
-    curriculum = [];
-    adminSections = [];
-    flashcards = [];
-
-    showScreen('auth-screen');
-    loader(false);
-
-    if (qs('auth-btn')) {
-      qs('auth-btn').disabled = false;
-      qs('auth-btn').textContent = qs('tab-reg')?.classList.contains('on')
-        ? 'Criar conta'
-        : 'Entrar';
-    }
-
-    if (qs('account-dropdown')) {
-      qs('account-dropdown').classList.remove('open');
-    }
-
-    if (qs('account-email')) {
-      qs('account-email').value = '';
-    }
-    if (qs('account-name-input')) {
-      qs('account-name-input').value = '';
-    }
-    if (qs('account-course')) {
-      qs('account-course').value = '';
-    }
-    if (qs('account-pass-input')) {
-      qs('account-pass-input').value = '';
-    }
-    if (qs('account-pass-confirm-input')) {
-      qs('account-pass-confirm-input').value = '';
-    }
-
-    if (qs('nav-flashcards-btn')) {
-      qs('nav-flashcards-btn').style.display = 'none';
-    }
-
-    return;
-  }
-
-  // user LOGADO daqui pra baixo
-  currentUser = user;
-  const ref = doc(db, 'users', user.uid);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      email: user.email,
-      name: user.displayName || user.email.split('@')[0],
-      isAdmin: ADMIN_EMAILS.includes(user.email),
-      course: '',
-      progress: {}
-    });
-  }
-
-  let data = (await getDoc(ref)).data();
-  userDoc = data;
-  progress = data.progress || {};
-
-  if (ADMIN_EMAILS.includes(user.email) && !data.isAdmin) {
-    await updateDoc(ref, { isAdmin: true });
-    data.isAdmin = true;
-  }
-
-  await loadCurriculum();
-  await loadFlashcards();
-
-  if (qs('nav-user-email')) {
-    qs('nav-user-email').textContent = data.name;
-  }
-
-  if (qs('account-email')) {
-    qs('account-email').value = user.email || data.email || '';
-  }
-
-  if (qs('account-name-input')) {
-    qs('account-name-input').value = data.name;
-  }
-  if (qs('account-course')) {
-    qs('account-course').value = data.course || '';
-  }
-  if (qs('account-pass-input')) {
-    qs('account-pass-input').value = '';
-  }
-  if (qs('account-pass-confirm-input')) {
-    qs('account-pass-confirm-input').value = '';
-  }
-
-  if (qs('nav-admin-btn')) {
-    qs('nav-admin-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
-  }
-  if (qs('nav-users-btn')) {
-    qs('nav-users-btn').style.display = data.isAdmin ? 'inline-flex' : 'none';
-  }
-  if (qs('nav-flashcards-btn')) {
-    qs('nav-flashcards-btn').style.display = 'inline-flex';
-  }
-
-  // inicializa checklist com filtro de curso
-  initChecklistCourseFilter(data);
-
-  showScreen('app-screen');
-  loader(false);
-  clearErr();
-
-  if (qs('auth-btn')) {
-    qs('auth-btn').disabled = false;
-    qs('auth-btn').textContent = 'Entrar';
-  }
-});
-
-
 // ============================================
 // DRAG AND DROP PARA REORDENAR CATEGORIAS
 // ============================================
-
 function onDragStart(e) {
   const sec = e.currentTarget;
   draggedSectionIndex = Number(sec.dataset.index);
@@ -1055,12 +922,95 @@ function onDragEnd(e) {
   draggedSectionIndex = null;
 }
 
-
 // ============================================
-// INICIALIZAÇÃO
+// INICIALIZAÇÃO + LISTENER DE AUTH
 // ============================================
 bindStaticEvents();
 bindAccountMenuEvents();
 bindEditUserModalEvents();
 updateAuthModeUI();
 loader(true);
+
+onAuthStateChanged(auth, async user => {
+  console.log('[onAuthStateChanged] disparou. user =', user);
+
+  try {
+    if (!user) {
+      console.log('[onAuthStateChanged] user NULL, tela de login');
+      currentUser = null;
+      userDoc = null;
+      curriculum = [];
+      progress = {};
+      adminSections = [];
+      flashcards = [];
+
+      setAdminUI(false);
+      showScreen('auth-screen', false);
+      showView('checklist');
+      loader(false);
+      clearErr();
+      return;
+    }
+
+    console.log('[onAuthStateChanged] user LOGADO', user);
+    currentUser = user;
+
+    const ref = doc(db, 'users', user.uid);
+    const snap = await getDoc(ref);
+    let data;
+
+    if (!snap.exists()) {
+      data = {
+        email: user.email,
+        name: user.displayName || user.email.split('@')[0],
+        isAdmin: ADMIN_EMAILS.includes(user.email),
+        course: '',
+        progress: {}
+      };
+      await setDoc(ref, data);
+    } else {
+      data = snap.data();
+    }
+
+    userDoc = data;
+    progress = data.progress || {};
+
+    if (ADMIN_EMAILS.includes(user.email) && !data.isAdmin) {
+      await updateDoc(ref, { isAdmin: true });
+      data.isAdmin = true;
+      userDoc.isAdmin = true;
+    }
+
+    await loadCurriculum();
+    await loadFlashcards();
+
+    if (qs('nav-user-email')) qs('nav-user-email').textContent = data.name || user.email;
+    if (qs('account-email')) qs('account-email').value = data.email || user.email;
+    if (qs('account-name-input')) qs('account-name-input').value = data.name || '';
+    if (qs('account-course')) qs('account-course').value = data.course || '';
+
+    initChecklistCourseFilter(data);
+    setAdminUI(!!data.isAdmin);
+
+    showScreen('app-screen', false, clearErr);
+    showView('checklist');
+    loader(false);
+
+    console.log('[onAuthStateChanged] fluxo de login finalizado com sucesso');
+  } catch (e) {
+    console.error('[onAuthStateChanged] ERRO:', e);
+    toast('Erro ao carregar seus dados. Tente novamente.', false);
+    showScreen('auth-screen', false);
+    showView('checklist');
+    loader(false);
+  }
+});
+
+// ============================================
+// EXPORTS (se precisar em outros módulos)
+// ============================================
+export {
+  openView,
+  renderChecklistView,
+  initChecklistCourseFilter
+};

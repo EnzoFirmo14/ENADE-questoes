@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ENADE • Configurações</title>
+
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
+  </head>
+  <body>
+    <div id="loader"><div class="spin"></div></div>
+    <div class="toast" id="toast"></div>
+
+    <nav class="topnav">
+      <div class="nav-brand">
+        <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
+        <span>ENA<span>DE</span></span>
+      </div>
+
+      <!-- MENU DE CONTA NO TOPO (igual em todas as páginas) -->
+      <div class="account-menu">
+        <button
+          class="account-trigger"
+          id="account-trigger"
+          type="button"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-controls="account-dropdown"
+        >
+          <span class="account-name" id="nav-user-email"></span>
+          <span class="account-chevron">▾</span>
+        </button>
+
+        <div class="account-dropdown" id="account-dropdown">
+          <div class="account-card">
+            <div class="account-card-head">
+              <strong>Minha conta</strong>
+              <span>Atualize seu nome e sua senha</span>
+            </div>
+
+            <div class="err-box" id="account-err" style="display:none"></div>
+
+            <div class="field">
+              <label for="account-email">Email</label>
+              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" />
+            </div>
+
+            <div class="field">
+              <label for="account-name-input">Nome</label>
+              <input id="account-name-input" type="text" placeholder="Seu nome" />
+            </div>
+
+            <div class="field">
+              <label for="account-course">Curso</label>
+              <select id="account-course" class="select-like">
+                <option value="">Selecione</option>
+                <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
+                <option value="SI">Sistemas de Informação</option>
+                <option value="EC">Engenharia da Computação</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="account-pass-input">Nova senha</label>
+              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" />
+            </div>
+
+            <div class="field">
+              <label for="account-pass-confirm-input">Confirmar nova senha</label>
+              <input
+                id="account-pass-confirm-input"
+                type="password"
+                placeholder="Digite a senha novamente"
+              />
+            </div>
+
+            <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
+              Salvar dados
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-links">
+        <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
+        <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
+        <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
+        <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
+        <button class="nav-btn" id="logout-btn">Sair</button>
+      </div>
+    </nav>
+
+    <!-- AQUI VEM O PAINEL ADMIN + FLASHCARDS, IGUAL AO PRINT -->
+    <main class="view active" id="page-config">
+      <div class="admin-wrap">
+        <!-- Cabeçalho do painel admin -->
+        <div class="admin-header">
+          <div>
+            <h2>Painel Admin</h2>
+            <p>Edite categorias e itens do checklist</p>
+          </div>
+          <button class="save-btn" id="save-btn">Salvar alterações</button>
+        </div>
+
+        <!-- Caixa de nova categoria -->
+        <div class="add-cat-box">
+          <input
+            id="new-cat-input"
+            placeholder="Nome da nova categoria..."
+          />
+          <select id="new-cat-prio" class="generic-select">
+            <option value="obrigatório">obrigatório</option>
+            <option value="importante">importante</option>
+            <option value="revisar">revisar</option>
+            <option value="atenção máxima">atenção máxima</option>
+          </select>
+          <button class="add-cat-btn" id="add-cat-btn">+ Categoria</button>
+        </div>
+
+        <!-- Lista de categorias / itens (renderizada via JS) -->
+        <div id="admin-sections"></div>
+
+        <!-- Divisor visual entre painel e flashcards -->
+        <div class="divider" style="margin-top:24px;margin-bottom:24px;"></div>
+
+        <!-- Seção para gerenciar flashcards dentro da página de configurações -->
+        <section class="card" id="admin-flashcards">
+          <div class="card-header">
+            <div>
+              <h3>Gerenciar flashcards</h3>
+              <p class="text-small text-muted">
+                Crie, edite e remova flashcards associados às categorias do checklist.
+              </p>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <!-- Formulário de criação rápida de flashcard -->
+            <div class="field-group three-cols">
+              <div class="field">
+                <label for="flash-admin-section">Categoria</label>
+                <select id="flash-admin-section" class="select-like">
+                  <!-- preenchido via JS com adminSections -->
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="flash-admin-question">Pergunta</label>
+                <input
+                  id="flash-admin-question"
+                  type="text"
+                  placeholder="Digite a pergunta do flashcard"
+                />
+              </div>
+
+              <div class="field">
+                <label for="flash-admin-answer">Resposta</label>
+                <input
+                  id="flash-admin-answer"
+                  type="text"
+                  placeholder="Digite a resposta"
+                />
+              </div>
+            </div>
+
+            <button class="btn-primary btn-sm" id="flash-admin-add-btn">
+              Adicionar flashcard
+            </button>
+
+            <div class="divider subtle"></div>
+
+            <!-- Lista resumida de flashcards -->
+            <div id="flash-admin-list">
+              <p class="muted-msg">Nenhum flashcard cadastrado ainda.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script src="./js/env.js"></script>
+
+    <!-- Inicializa o menu de conta (dropdown de usuário) -->
+    <script type="module">
+      import { initAccountMenu } from './js/account-menu.js';
+      import { loader } from './js/ui.js';
+
+      loader(true);
+      initAccountMenu().finally(() => loader(false));
+    </script>
+
+    <!-- Lógica específica do painel admin + flashcards -->
+    <script type="module" src="./js/config-page.js"></script>
+  </body>
+</html>

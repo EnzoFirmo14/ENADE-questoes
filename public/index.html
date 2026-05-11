@@ -1,44 +1,42 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>ENADE Checklist</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ENADE • Login</title>
+
+    <link rel="stylesheet" href="./css/styles.css" />
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
-    <link rel="stylesheet" href="./css/styles.css"/>
   </head>
   <body>
     <div id="loader"><div class="spin"></div></div>
     <div class="toast" id="toast"></div>
 
-    <!-- TELA DE AUTENTICAÇÃO -->
-    <div id="auth-screen" class="screen">
+    <div id="auth-screen" class="screen active">
       <div class="auth-card">
-        <div class="auth-logo">ENADE • Revisão</div>
+        <div class="auth-logo">ENADE Revisão</div>
         <h1 class="auth-title">Checklist</h1>
         <p class="auth-sub">Entre para acompanhar seu progresso.</p>
+
         <div class="tabs">
           <button class="tab on" id="tab-login">Entrar</button>
           <button class="tab" id="tab-reg">Criar conta</button>
         </div>
 
-        <div id="auth-err" class="err-box" style="display:none"></div>
+        <div class="err-box" id="auth-err" style="display:none"></div>
 
-        <!-- APENAS CAMPOS DE LOGIN/REGISTRO AQUI -->
-        <div class="field" id="name-field" style="display:none;">
+        <div class="field" id="name-field" style="display:none">
           <label for="inp-name">Nome</label>
           <input id="inp-name" type="text" placeholder="Seu nome" />
         </div>
 
-        <!-- campo de curso: só aparece no registro -->
-        <div class="field" id="course-field" style="display:none;">
+        <div class="field" id="course-field" style="display:none">
           <label for="inp-course">Curso</label>
           <select id="inp-course" class="select-like">
             <option value="">Selecione</option>
-            <option value="ADS (Análise e Desenvolvimento de Sistemas)">ADS (Análise e Desenvolvimento de Sistemas)</option>
-            <option value="SI (Sistemas de Informação)">SI (Sistemas de Informação)</option>
-            <option value="EC (Engenharia da Computação)">EC (Engenharia da Computação)</option>
+            <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
+            <option value="SI">Sistemas de Informação</option>
+            <option value="EC">Engenharia da Computação</option>
           </select>
         </div>
 
@@ -49,252 +47,19 @@
 
         <div class="field">
           <label for="inp-pass">Senha</label>
-          <div class="pass-wrap">
-            <input id="inp-pass" type="password" placeholder="Digite sua senha" />
-            <button type="button" class="pass-toggle" data-toggle-pass="inp-pass">Mostrar</button>
-          </div>
+          <input id="inp-pass" type="password" placeholder="Digite sua senha" />
         </div>
 
-        <div class="field" id="confirm-pass-field" style="display:none;">
+        <div class="field" id="confirm-pass-field" style="display:none">
           <label for="inp-pass-confirm">Confirmar senha</label>
-          <div class="pass-wrap">
-            <input id="inp-pass-confirm" type="password" placeholder="Digite a senha novamente" />
-            <button type="button" class="pass-toggle" data-toggle-pass="inp-pass-confirm">Mostrar</button>
-          </div>
+          <input id="inp-pass-confirm" type="password" placeholder="Digite novamente" />
         </div>
 
         <button class="btn-primary" id="auth-btn">Entrar</button>
       </div>
     </div>
 
-    <!-- APLICAÇÃO -->
-    <div id="app-screen" class="screen">
-      <nav class="topnav">
-        <div class="nav-brand">
-          <img
-            src="./assets/Imagem Site Enade.png"
-            alt="Logo ENADE"
-            class="nav-logo"
-          />
-          <span>ENA<span>DE</span></span>
-        </div>
-
-        <div class="account-menu">
-          <button
-            class="account-trigger"
-            id="account-trigger"
-            type="button"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="account-dropdown"
-          >
-            <span class="account-name" id="nav-user-email"></span>
-            <span class="account-chevron">⌄</span>
-          </button>
-
-          <div class="account-dropdown" id="account-dropdown">
-            <div class="account-card">
-              <div class="account-card-head">
-                <strong>Minha conta</strong>
-                <span>Atualize seu nome e sua senha</span>
-              </div>
-
-              <div id="account-err" class="err-box" style="display:none"></div>
-
-              <!-- EMAIL SOMENTE LEITURA DA CONTA -->
-              <div class="field">
-                <label for="account-email">Email</label>
-                <input
-                  id="account-email"
-                  type="email"
-                  readonly
-                  placeholder="email@exemplo.com"
-                />
-              </div>
-
-              <div class="field">
-                <label for="account-name-input">Nome</label>
-                <input
-                  id="account-name-input"
-                  type="text"
-                  placeholder="Seu nome"
-                />
-              </div>
-
-              <!-- seleção de curso na conta -->
-              <div class="field">
-                <label for="account-course">Curso</label>
-                <select id="account-course" class="select-like">
-                  <option value="">Selecione</option>
-                  <option value="ADS (Análise e Desenvolvimento de Sistemas)">ADS (Análise e Desenvolvimento de Sistemas)</option>
-                  <option value="SI (Sistemas de Informação)">SI (Sistemas de Informação)</option>
-                  <option value="EC (Engenharia da Computação)">EC (Engenharia da Computação)</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label for="account-pass-input">Nova senha</label>
-                <div class="pass-wrap">
-                  <input
-                    id="account-pass-input"
-                    type="password"
-                    placeholder="Digite a nova senha"
-                  />
-                  <button
-                    type="button"
-                    class="pass-toggle"
-                    data-toggle-pass="account-pass-input"
-                  >
-                    Mostrar
-                  </button>
-                </div>
-              </div>
-
-              <div class="field">
-                <label for="account-pass-confirm-input">Confirmar nova senha</label>
-                <div class="pass-wrap">
-                  <input
-                    id="account-pass-confirm-input"
-                    type="password"
-                    placeholder="Digite a senha novamente"
-                  />
-                  <button
-                    type="button"
-                    class="pass-toggle"
-                    data-toggle-pass="account-pass-confirm-input"
-                  >
-                    Mostrar
-                  </button>
-                </div>
-              </div>
-
-              <button class="save-account-btn" id="save-account-btn" type="button">
-                Salvar dados
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <button class="nav-btn" id="nav-admin-btn" style="display:none">⚙ Configurações</button>
-        <button class="nav-btn" id="nav-users-btn" style="display:none">👥 Usuários</button>
-        <button class="nav-btn" id="nav-flashcards-btn" style="display:none">🃏 Flashcards</button>
-        <button class="nav-btn" id="nav-checklist-btn" style="display:none">📋 Checklist</button>
-        <button class="nav-btn" id="logout-btn">Sair</button>
-      </nav>
-
-      <div id="view-checklist" class="view active">
-        <div class="wrap">
-          <div class="hero">
-            <div class="hero-tag">Revisão rápida</div>
-            <h1>Checklist interativo</h1>
-            <p id="hero-greeting">Bom estudo!</p>
-          </div>
-
-          <div class="prog-bar-wrap">
-            <span class="prog-nums" id="prog-nums">0 / 0</span>
-            <div class="prog-track">
-              <div class="prog-fill" id="prog-fill" style="width:0%"></div>
-            </div>
-            <span class="prog-pct" id="prog-pct">0%</span>
-            <button class="reset-btn" id="reset-progress-btn">Reiniciar</button>
-          </div>
-
-          <div id="sections-container"></div>
-        </div>
-      </div>
-
-      <div id="view-flashcards" class="view">
-        <div class="wrap" id="flashcards-container"></div>
-      </div>
-
-      <div id="view-admin" class="view">
-        <div class="admin-wrap">
-          <div class="admin-header">
-            <div>
-              <h2>Painel Admin</h2>
-              <p>Edite categorias e itens do checklist</p>
-            </div>
-            <button class="save-btn" id="save-btn">Salvar alterações</button>
-          </div>
-          <div class="add-cat-box">
-            <input id="new-cat-input" placeholder="Nome da nova categoria…"/>
-            <select id="new-cat-prio" class="generic-select">
-              <option>obrigatório</option>
-              <option>importante</option>
-              <option>revisar</option>
-              <option>atenção máxima</option>
-            </select>
-            <button class="add-cat-btn" id="add-cat-btn">+ Categoria</button>
-          </div>
-          <div id="admin-sections"></div>
-        </div>
-      </div>
-
-      <div id="view-users" class="view">
-        <div class="users-wrap">
-          <div class="admin-header">
-            <div>
-              <h2>Usuários cadastrados</h2>
-              <p>Progresso de cada usuário no checklist</p>
-            </div>
-          </div>
-          <div id="users-list"><p class="muted-msg">Carregando…</p></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL DE EDIÇÃO DE ALUNO (ADMIN) -->
-    <div class="modal-backdrop" id="edit-user-modal" style="display:none;">
-      <div class="modal">
-        <h3>Editar aluno</h3>
-        <p class="modal-sub">Atualize o nome e o curso do aluno.</p>
-
-        <div class="field">
-          <label for="edit-user-name">Nome</label>
-          <input id="edit-user-name" type="text" placeholder="Nome do aluno" />
-        </div>
-
-        <div class="field">
-          <label for="edit-user-course">Curso</label>
-          <select id="edit-user-course" class="select-like">
-            <option value="">Sem curso</option>
-            <option value="ADS (Análise e Desenvolvimento de Sistemas)">ADS (Análise e Desenvolvimento de Sistemas)</option>
-            <option value="SI (Sistemas de Informação)">SI (Sistemas de Informação)</option>
-            <option value="EC (Engenharia da Computação)">EC (Engenharia da Computação)</option>
-          </select>
-        </div>
-
-        <!-- Campo para promover a admin (só visível para admins) -->
-        <div class="field" id="edit-user-admin-field" style="display:none;">
-          <label class="checkbox-label">
-            <input id="edit-user-is-admin" type="checkbox" />
-            <span>Tornar administrador</span>
-          </label>
-          <small style="display:block;margin-top:4px;color:var(--muted)">
-            Permite que este usuário edite categorias, itens e gerencie outros usuários.
-          </small>
-        </div>
-
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" id="edit-user-cancel">Cancelar</button>
-          <button type="button" class="btn-primary" id="edit-user-save">Salvar</button>
-        </div>
-      </div>
-    </div>
-
     <script src="./js/env.js"></script>
-    <script>
-      // Variáveis de ambiente injetadas automaticamente
-      window.__ENV__ = {
-        "VITE_FIREBASE_API_KEY": "AIzaSyBMA-vCw5wFp1WaF_rj8508oZQHpT2rsxQ",
-        "VITE_FIREBASE_AUTH_DOMAIN": "enadequestoes.firebaseapp.com",
-        "VITE_FIREBASE_PROJECT_ID": "enadequestoes",
-        "VITE_FIREBASE_STORAGE_BUCKET": "enadequestoes.firebasestorage.app",
-        "VITE_FIREBASE_MESSAGING_SENDER_ID": "541044453598",
-        "VITE_FIREBASE_APP_ID": "1:541044453598:web:3fa61640e1527f0962524f",
-        "VITE_ADMIN_EMAILS": "admintop@admin.com"
-      };
-    </script>
-    <script type="module" src="./js/app.js"></script>
+    <script type="module" src="./js/login-page.js"></script>
   </body>
 </html>

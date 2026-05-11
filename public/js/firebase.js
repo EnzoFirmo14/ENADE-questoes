@@ -1,7 +1,4 @@
-// ============================================
-// FIREBASE - CONFIGURAÇÃO E INICIALIZAÇÃO
-// ============================================
-
+// js/firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import {
   getAuth,
@@ -29,28 +26,20 @@ import {
   arrayUnion,
   arrayRemove
 } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-import { ENV, hasEnv } from './env.js';
 
-if (!hasEnv()) {
-  console.warn(
-    '⚠️ Variáveis de ambiente do Firebase não detectadas.\n' +
-    'Execute: npm run inject-env\n' +
-    'Ou configure seu .env: cp .env.example .env'
-  );
-}
+// lê env.js
+const __ENV = (typeof window !== 'undefined' && window.__ENV__) ? window.__ENV__ : {};
 
 const firebaseConfig = {
-  apiKey: ENV.FIREBASE_API_KEY || 'CONFIGURAR',
-  authDomain: ENV.FIREBASE_AUTH_DOMAIN || 'CONFIGURAR',
-  projectId: ENV.FIREBASE_PROJECT_ID || 'CONFIGURAR',
-  storageBucket: ENV.FIREBASE_STORAGE_BUCKET || 'CONFIGURAR',
-  messagingSenderId: ENV.FIREBASE_MESSAGING_SENDER_ID || 'CONFIGURAR',
-  appId: ENV.FIREBASE_APP_ID || 'CONFIGURAR'
+  apiKey: __ENV.VITE_FIREBASE_API_KEY,
+  authDomain: __ENV.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: __ENV.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: __ENV.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: __ENV.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: __ENV.VITE_FIREBASE_APP_ID
 };
 
-let app;
-let auth;
-let db;
+let app, auth, db;
 
 try {
   app = initializeApp(firebaseConfig);
@@ -58,22 +47,21 @@ try {
   db = getFirestore(app);
 } catch (error) {
   console.error('Erro ao inicializar Firebase:', error);
-  console.error('Configure suas variáveis de ambiente corretamente.');
   throw error;
 }
 
-export { app, auth, db };
-
 export {
+  app,
+  auth,
+  db,
+  // auth
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile,
-  updatePassword
-};
-
-export {
+  updatePassword,
+  // firestore
   doc,
   getDoc,
   setDoc,

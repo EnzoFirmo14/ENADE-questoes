@@ -1,100 +1,73 @@
-// ============================================
-// VIEW - CHECKLIST
-// ============================================
-
-import { qs } from '../ui.js';
-import { PRIO_STYLE } from '../constants.js';
-
-/**
- * Calcula o total de itens no currículo
- */
-export const totalItems = curriculum => curriculum.reduce((a, s) => a + s.items.length, 0);
-
-/**
- * Calcula quantos itens foram marcados como concluídos
- */
-export const doneItems = progress => Object.values(progress).filter(Boolean).length;
-
-/**
- * Atualiza a barra de progresso visual
- */
-export function updateProgress(curriculum, progress) {
-  const d = doneItems(progress);
-  const t = totalItems(curriculum);
-  const pct = t ? Math.round(d / t * 100) : 0;
-
-  qs('prog-nums').textContent = `${d} / ${t}`;
-  qs('prog-fill').style.width = `${pct}%`;
-  qs('prog-pct').textContent = `${pct}%`;
-}
-
-/**
- * Renderiza a lista de checklist com todas as categorias e itens
- */
+// js/views/checklist.js
 export function renderChecklist(curriculum, progress, onToggle) {
-  const cont = qs('sections-container');
+  const cont = document.getElementById('sections-container');
+  if (!cont) return;
+
   cont.innerHTML = '';
+  let doneCount = 0;
+  let totalCount = 0;
 
   curriculum.forEach((sec, si) => {
-    // Contar itens concluídos nesta seção
-    const doneInSec = sec.items.filter((_, ii) => progress[`${si}-${ii}`]).length;
+    const items = sec.items || [];
 
-    // Obter estilo de prioridade
-    const style = PRIO_STYLE[sec.prio] || PRIO_STYLE['revisar'];
+    const secEl = document.createElement('div');
+    secEl.className = 'section';
 
-    // Criar elemento da seção
-    const div = document.createElement('div');
-    div.className = 'section';
-    div.innerHTML = `
-      <div class="sec-head">
-        <span class="cat-dot" style="background:${sec.color}"></span>
-        <span class="sec-title">${sec.cat}</span>
-        <span class="prio-badge" style="background:${style.bg};color:${style.text}">${sec.prio}</span>
-        <span class="sec-count" id="seccount-${si}">${doneInSec}/${sec.items.length}</span>
-      </div>
-      <div class="items" id="items-${si}"></div>
-    `;
-    cont.appendChild(div);
+    const head = document.createElement('div');
+    head.className = 'sec-head';
 
-    // Renderizar itens
-    const itemsEl = qs(`items-${si}`);
-    sec.items.forEach((txt, ii) => {
+    const title = document.createElement('span');
+    title.className = 'sec-title';
+    title.textContent = sec.cat || 'Seção';
+
+    head.appendChild(title);
+    secEl.appendChild(head);
+
+    const itemsEl = document.createElement('div');
+    itemsEl.className = 'items';
+
+    items.forEach((txt, ii) => {
       const id = `${si}-${ii}`;
-      const el = document.createElement('div');
-      el.id = `item-${id}`;
-      el.className = 'item' + (progress[id] ? ' done' : '');
-      el.innerHTML = `
-        <span class="cb${progress[id] ? ' on' : ''}">${progress[id] ? '✓' : ''}</span>
-        <span class="item-text">${txt}</span>
-      `;
-      el.addEventListener('click', () => onToggle(id, si));
-      itemsEl.appendChild(el);
+      totalCount++;
+
+      const itemEl = document.createElement('div');
+      itemEl.className = 'item' + (progress[id] ? ' done' : '');
+
+      const cb = document.createElement('button');
+      cb.className = 'cb';
+      cb.textContent = progress[id] ? '✓' : '';
+      cb.addEventListener('click', () => onToggle(id, si));
+
+      const span = document.createElement('span');
+      span.className = 'item-text';
+      span.textContent = txt;
+
+      if (progress[id]) doneCount++;
+
+      itemEl.appendChild(cb);
+      itemEl.appendChild(span);
+      itemsEl.appendChild(itemEl);
     });
+
+    secEl.appendChild(itemsEl);
+    cont.appendChild(secEl);
   });
 
-  updateProgress(curriculum, progress);
+  const progNums = document.getElementById('prog-nums');
+  const progPct = document.getElementById('prog-pct');
+  const progFill = document.getElementById('prog-fill');
+
+  const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
+
+  if (progNums) progNums.textContent = `${doneCount} / ${totalCount}`;
+  if (progPct) progPct.textContent = `${pct}%`;
+  if (progFill) progFill.style.width = `${pct}%`;
 }
 
-/**
- * Sincroniza a visualização de um item após mudança de estado
- */
 export function syncChecklistItem(curriculum, progress, id, si) {
-  const el = qs(`item-${id}`);
+  // aqui você pode manter sua lógica extra, se precisar
+}
 
-  if (el) {
-    el.className = 'item' + (progress[id] ? ' done' : '');
-    const cb = el.querySelector('.cb');
-    cb.className = 'cb' + (progress[id] ? ' on' : '');
-    cb.textContent = progress[id] ? '✓' : '';
-  }
-
-  // Atualizar contador da seção
-  const sec = curriculum[si];
-  if (sec) {
-    const done = sec.items.filter((_, ii) => progress[`${si}-${ii}`]).length;
-    const counter = qs(`seccount-${si}`);
-    if (counter) counter.textContent = `${done}/${sec.items.length}`;
-  }
-
-  updateProgress(curriculum, progress);
+export function totalItems(curriculum) {
+  return curriculum.reduce((acc, sec) => acc + (sec.items?.length || 0), 0);
 }
