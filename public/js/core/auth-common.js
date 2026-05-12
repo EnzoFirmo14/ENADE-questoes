@@ -1,6 +1,6 @@
 // js/auth-common.js
-import { auth, db, onAuthStateChanged, doc, getDoc } from './firebase.js';
-import { toast, loader } from './ui.js';
+import { auth, db, onAuthStateChanged, doc, getDoc } from './core/firebase.js';
+import { toast, loader } from './core/ui.js';
 
 export function requireAuth({ redirectTo = './index.html', requireAdmin = false } = {}) {
   loader(true);

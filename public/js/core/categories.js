@@ -12,7 +12,7 @@ import {
   query,
   orderBy,
   serverTimestamp
-} from "./firebase.js";
+} from "./core/firebase.js";
 
 const CATEGORIES_COLLECTION = "categories";
 

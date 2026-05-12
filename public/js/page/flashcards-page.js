@@ -5,9 +5,9 @@ import {
   signOut,
   collection,
   getDocs
-} from './firebase.js';
-import { requireAuth } from './auth-common.js';
-import { qs, toast, loader } from './ui.js';
+} from './core/firebase.js';
+import { requireAuth } from './core/auth-common.js';
+import { qs, toast, loader } from './core/ui.js';
 import { renderFlashcardsView } from './views/flashcards.js';
  
 let userCtx    = null;

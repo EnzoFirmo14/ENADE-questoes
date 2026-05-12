@@ -1,5 +1,5 @@
 // js/views/flashcards.js
-import { qs } from '../ui.js';
+import { qs } from '../core/ui.js';
 
 /**
  * Renderiza a tela de flashcards.

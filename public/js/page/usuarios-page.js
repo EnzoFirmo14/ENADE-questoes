@@ -7,9 +7,9 @@ import {
   getDocs,
   doc,
   getDoc
-} from './firebase.js';
-import { requireAuth } from './auth-common.js';
-import { qs, toast, loader } from './ui.js';
+} from './core/firebase.js';
+import { requireAuth } from './core/auth-common.js';
+import { qs, toast, loader } from './core/ui.js';
 import { totalItems } from './views/checklist.js';
 import { renderUsersList } from './views/users.js';  // IMPORTANTE
 

@@ -1,6 +1,6 @@
 // js/auth-listener.js
-import { auth, onAuthStateChanged } from './firebase.js';
-import { loader, clearErr } from './ui.js';
+import { auth, onAuthStateChanged } from './core/firebase.js';
+import { loader, clearErr } from './core/ui.js';
 
 function getCurrentPage() {
   const path = window.location.pathname;

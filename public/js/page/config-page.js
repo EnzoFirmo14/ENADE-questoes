@@ -9,9 +9,9 @@ import {
   getDocs,
   addDoc,
   deleteDoc
-} from './firebase.js';
-import { requireAuth } from './auth-common.js';
-import { qs, toast } from './ui.js';
+} from './core/firebase.js';
+import { requireAuth } from './core/auth-common.js';
+import { qs, toast } from './core/ui.js';
 import {
   renderAdmin,
   renderAdminItems,

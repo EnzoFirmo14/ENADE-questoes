@@ -1,4 +1,4 @@
-// js/checklist-page.js
+// js/page/checklist-page.js
 import {
   auth,
   db,
@@ -7,18 +7,18 @@ import {
   getDoc,
   setDoc,
   updateDoc
-} from './firebase.js';
-import { ADMIN_EMAILS } from './constants.js';
-import { requireAuth } from './auth-common.js';
-import { toast, loader, qs } from './ui.js';
-import { renderChecklist, syncChecklistItem } from './views/checklist.js';
+} from '../core/firebase.js';
+import { ADMIN_EMAILS } from '../core/constants.js';
+import { requireAuth } from '../core/auth-common.js';
+import { toast, loader, qs } from '../core/ui.js';
+import { renderChecklist, syncChecklistItem } from '../views/checklist.js';
 
 let currentUser = null;
 let userDoc     = null;
 let curriculum  = [];
 let progress    = {};
 
-// Cache da última lista filtrada, para manter índice si coerente
+// Cache da última lista filtrada, para manter índice sincrônico
 let filteredSections = [];
 
 // ============================================

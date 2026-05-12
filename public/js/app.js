@@ -1,16 +1,16 @@
 // ============================================
 // IMPORTAÇÕES
 // ============================================
-import { ADMIN_EMAILS } from './constants.js';
+import { ADMIN_EMAILS } from './core/constants.js';
 import {
   auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
   onAuthStateChanged, updateProfile, updatePassword
-} from './firebase.js';
+} from './core/firebase.js';
 import {
   qs, showErr, clearErr, toast, loader,
   showScreen, switchTab, showView, setAdminUI
-} from './ui.js';
+} from './core/ui.js';
 import { renderChecklist, syncChecklistItem, totalItems } from './views/checklist.js';
 import { renderAdmin, renderAdminItems, toggleAdminSec, nextCategoryColor } from './views/admin.js';
 import { renderFlashcardsView } from './views/flashcards.js';

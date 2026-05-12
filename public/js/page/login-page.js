@@ -7,9 +7,9 @@ import {
   updateProfile,
   setDoc,
   doc
-} from './firebase.js';
-import { ADMIN_EMAILS } from './constants.js';
-import { qs, showErr, clearErr, toast, loader } from './ui.js';
+} from '../core/firebase.js';
+import { ADMIN_EMAILS } from '../core/constants.js';
+import { qs, showErr, clearErr, toast, loader } from '../core/ui.js';
 
 function bindAuthUI() {
   qs('tab-login')?.addEventListener('click', () => {

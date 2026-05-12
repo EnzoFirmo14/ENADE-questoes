@@ -1,6 +1,6 @@
 // public/js/seed.js
 import { DEFAULT_DATA, normalizeCategory } from "./data.js";
-import { createCategory, getCategoriesOnce } from "./categories.js";
+import { createCategory, getCategoriesOnce } from "./core/categories.js";
 
 export async function seedCategoriesIfEmpty() {
   const existing = await getCategoriesOnce();

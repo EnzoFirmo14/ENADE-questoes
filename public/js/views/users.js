@@ -2,7 +2,7 @@
 // VIEW - LISTA DE USUÁRIOS
 // ============================================
 
-import { qs } from '../ui.js';
+import { qs } from '../core/ui.js';
 
 /**
  * Renderiza a lista de usuários com seu progresso

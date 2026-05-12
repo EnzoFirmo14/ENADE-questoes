@@ -3,8 +3,8 @@
 // VIEW - ADMINISTRAÇÃO
 // ============================================
  
-import { qs } from '../ui.js';
-import { CATEGORY_COLORS } from '../constants.js';
+import { qs } from '../core/ui.js';
+import { CATEGORY_COLORS } from '../core/constants.js';
  
 /**
  * Alterna a expansão/contração de uma seção administrativamente

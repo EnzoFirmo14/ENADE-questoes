@@ -112,11 +112,13 @@
       </div>
     </main>
 
-    <script src="./js/env.js"></script>
-    <!-- Script principal do checklist (módulo) -->
+    <!-- 1) env.js: preenche window.__ENV__ -->
+    <script src="./js/core/env.js"></script>
+
+    <!-- 2) entrypoint da página (módulo) -->
     <script type="module">
-      import { initAccountMenu } from './js/account-menu.js';
-      import { initChecklistPage } from './js/checklist-page.js';
+      import { initAccountMenu } from './js/components/account-menu.js';
+      import { initChecklistPage } from './js/page/checklist-page.js';
 
       initAccountMenu();
       initChecklistPage();
