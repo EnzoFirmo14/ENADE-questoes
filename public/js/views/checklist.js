@@ -1,13 +1,35 @@
 // js/views/checklist.js
-export function renderChecklist(curriculum, progress, onToggle) {
+
+// Filtra seções de acordo com o curso do usuário e o array sec.courses
+function filterSectionsByCourse(curriculum, userCourse) {
+  if (!userCourse) return curriculum; // sem curso definido -> mostra tudo
+
+  return curriculum.filter(sec => {
+    const courses = Array.isArray(sec.courses) ? sec.courses : [];
+
+    // sem cursos marcados -> aparece para todos
+    if (!courses.length) return true;
+
+    // marcado "Todos"
+    if (courses.includes('__ALL__')) return true;
+
+    // seção específica pro curso do usuário
+    return courses.includes(userCourse);
+  });
+}
+
+export function renderChecklist(curriculum, progress, onToggle, userCourse) {
   const cont = document.getElementById('sections-container');
   if (!cont) return;
+
+  // aplica filtro pelo curso
+  const visibleSections = filterSectionsByCourse(curriculum, userCourse);
 
   cont.innerHTML = '';
   let doneCount = 0;
   let totalCount = 0;
 
-  curriculum.forEach((sec, si) => {
+  visibleSections.forEach((sec, si) => {
     const items = sec.items || [];
 
     const secEl = document.createElement('div');
@@ -27,6 +49,7 @@ export function renderChecklist(curriculum, progress, onToggle) {
     itemsEl.className = 'items';
 
     items.forEach((txt, ii) => {
+      // id continua baseado no índice da seção + índice do item
       const id = `${si}-${ii}`;
       totalCount++;
 
@@ -68,6 +91,8 @@ export function syncChecklistItem(curriculum, progress, id, si) {
   // aqui você pode manter sua lógica extra, se precisar
 }
 
-export function totalItems(curriculum) {
-  return curriculum.reduce((acc, sec) => acc + (sec.items?.length || 0), 0);
+export function totalItems(curriculum, userCourse) {
+  // soma só os itens das seções visíveis para o curso
+  const visibleSections = filterSectionsByCourse(curriculum, userCourse);
+  return visibleSections.reduce((acc, sec) => acc + (sec.items?.length || 0), 0);
 }

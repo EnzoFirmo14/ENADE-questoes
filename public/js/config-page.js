@@ -11,26 +11,70 @@ import {
   deleteDoc
 } from './firebase.js';
 import { requireAuth } from './auth-common.js';
-import { qs, toast, loader } from './ui.js';
+import { qs, toast } from './ui.js';
 import {
   renderAdmin,
   renderAdminItems,
   toggleAdminSec,
   nextCategoryColor
 } from './views/admin.js';
+import { renderFlashcardsView } from './views/flashcards.js';
 
-let userCtx = null;
-let adminSections = [];
-let flashcards = [];
+let userCtx            = null;
+let adminSections      = [];
+let flashcards         = [];
 let draggedSectionIndex = null;
+
+// Estado atual da view de flashcards (para re-render após CRUD)
+let fcSectionIndex = 0;
+let fcCardIndex    = 0;
+
+// Preserva estado aberto entre re-renders
+let openSectionBodies = new Set();
+let openCourseBoxes   = new Set();
+
+// ============================================
+// PRESERVAÇÃO DE ESTADO
+// ============================================
+
+function saveState() {
+  openSectionBodies.clear();
+  document.querySelectorAll('.admin-sec-body.open').forEach(el => {
+    const si = el.id.replace('admin-body-', '');
+    openSectionBodies.add(Number(si));
+  });
+
+  openCourseBoxes.clear();
+  document.querySelectorAll('.admin-courses-row.open').forEach(el => {
+    const si = el.id.replace('admin-courses-', '');
+    openCourseBoxes.add(Number(si));
+  });
+}
+
+function restoreState() {
+  openSectionBodies.forEach(si => {
+    const body = qs(`admin-body-${si}`);
+    if (body) body.className = 'admin-sec-body open';
+  });
+
+  openCourseBoxes.forEach(si => {
+    const row = qs(`admin-courses-${si}`);
+    if (row) row.classList.add('open');
+    const arrow = document.querySelector(
+      `[data-courses-toggle="${si}"] .arrow-icon`
+    );
+    if (arrow) arrow.textContent = '▴';
+  });
+}
 
 // ============================================
 // CURRÍCULO (CATEGORIAS / ITENS)
 // ============================================
 
 async function loadCurriculum() {
-  const ref = doc(db, 'curriculum', 'main');
+  const ref  = doc(db, 'curriculum', 'main');
   const snap = await getDoc(ref);
+
   if (snap.exists()) {
     adminSections = snap.data().sections || [];
   } else {
@@ -38,11 +82,8 @@ async function loadCurriculum() {
     await setDoc(ref, { sections: [] });
   }
 
-  // garante sempre um array de courses
   adminSections.forEach(sec => {
-    if (!Array.isArray(sec.courses)) {
-      sec.courses = [];
-    }
+    if (!Array.isArray(sec.courses)) sec.courses = [];
   });
 }
 
@@ -64,7 +105,13 @@ async function saveCurriculum() {
   toast('Currículo atualizado!', true);
 }
 
+// ============================================
+// RENDER ADMIN
+// ============================================
+
 function renderAdminView() {
+  saveState();
+
   renderAdmin(adminSections, {
     toggleAdminSec,
     updatePrio: (si, val) => {
@@ -80,9 +127,13 @@ function renderAdminView() {
     onDrop,
     onDragEnd
   });
+
+  restoreState();
 }
 
-// === Funções de categorias/itens (mesmas do app.js original) ===
+// ============================================
+// CATEGORIAS / ITENS
+// ============================================
 
 function addCategory() {
   const name = qs('new-cat-input')?.value.trim() || '';
@@ -94,24 +145,21 @@ function addCategory() {
   }
 
   adminSections.push({
-    cat: name,
+    cat:   name,
     color: nextCategoryColor(adminSections.length),
     prio,
     items: [],
     courses: []
   });
 
-  if (qs('new-cat-input')) {
-    qs('new-cat-input').value = '';
-  }
+  if (qs('new-cat-input')) qs('new-cat-input').value = '';
 
   renderAdminView();
 
   const newIndex = adminSections.length - 1;
   setTimeout(() => {
     toggleAdminSec(newIndex);
-    const firstInput = qs(`new-item-${newIndex}`);
-    if (firstInput) firstInput.focus();
+    qs(`new-item-${newIndex}`)?.focus();
   }, 50);
 
   toast('Categoria criada. Agora adicione os assuntos.');
@@ -129,7 +177,6 @@ function addItem(si) {
   if (!inp) return;
 
   const txt = inp.value.trim();
-
   if (!txt) {
     toast('Digite o assunto antes de adicionar.');
     return;
@@ -139,16 +186,12 @@ function addItem(si) {
   inp.value = '';
   renderAdminItems(adminSections, si, { editItem, removeItem });
 
-  setTimeout(() => {
-    const inputAgain = qs(`new-item-${si}`);
-    if (inputAgain) inputAgain.focus();
-  }, 0);
+  setTimeout(() => qs(`new-item-${si}`)?.focus(), 0);
 }
 
 function editItem(si, ii) {
   const txt = prompt('Editar:', adminSections[si].items[ii]);
   if (txt === null || !txt.trim()) return;
-
   adminSections[si].items[ii] = txt.trim();
   renderAdminItems(adminSections, si, { editItem, removeItem });
 }
@@ -158,26 +201,16 @@ function removeItem(si, ii) {
   renderAdminItems(adminSections, si, { editItem, removeItem });
 }
 
-// cursos associados à seção (se você estiver usando filtros por curso)
 function toggleSectionCourse(si, courseId, checked) {
   const sec = adminSections[si];
-  if (!Array.isArray(sec.courses)) {
-    sec.courses = [];
-  }
+  if (!Array.isArray(sec.courses)) sec.courses = [];
 
   if (courseId === '__ALL__') {
-    if (checked) {
-      sec.courses = ['__ALL__'];
-    } else {
-      sec.courses = [];
-    }
+    sec.courses = checked ? ['__ALL__'] : [];
   } else {
     sec.courses = sec.courses.filter(c => c !== '__ALL__');
-
     if (checked) {
-      if (!sec.courses.includes(courseId)) {
-        sec.courses.push(courseId);
-      }
+      if (!sec.courses.includes(courseId)) sec.courses.push(courseId);
     } else {
       sec.courses = sec.courses.filter(c => c !== courseId);
     }
@@ -186,11 +219,13 @@ function toggleSectionCourse(si, courseId, checked) {
   renderAdminView();
 }
 
-// drag and drop de categorias
+// ============================================
+// DRAG AND DROP
+// ============================================
+
 function onDragStart(e) {
-  const sec = e.currentTarget;
-  draggedSectionIndex = Number(sec.dataset.index);
-  sec.classList.add('dragging');
+  draggedSectionIndex = Number(e.currentTarget.dataset.index);
+  e.currentTarget.classList.add('dragging');
 }
 
 function onDragOver(e) {
@@ -200,19 +235,14 @@ function onDragOver(e) {
 function onDrop(e) {
   e.preventDefault();
   const targetIndex = Number(e.currentTarget.dataset.index);
-
   if (
     draggedSectionIndex === null ||
     Number.isNaN(targetIndex) ||
     draggedSectionIndex === targetIndex
-  ) {
-    return;
-  }
+  ) return;
 
-  const draggedItem = adminSections[draggedSectionIndex];
-  adminSections.splice(draggedSectionIndex, 1);
-  adminSections.splice(targetIndex, 0, draggedItem);
-
+  const [item] = adminSections.splice(draggedSectionIndex, 1);
+  adminSections.splice(targetIndex, 0, item);
   draggedSectionIndex = null;
   renderAdminView();
 }
@@ -223,7 +253,7 @@ function onDragEnd(e) {
 }
 
 // ============================================
-// FLASHCARDS ADMIN
+// FLASHCARDS ADMIN — renderFlashcardsView
 // ============================================
 
 async function loadFlashcards() {
@@ -232,104 +262,47 @@ async function loadFlashcards() {
   snap.forEach(d => flashcards.push({ id: d.id, ...d.data() }));
 }
 
-function fillFlashcardSectionSelect() {
-  const sel = qs('flash-admin-section');
-  if (!sel) return;
-  sel.innerHTML = '';
-  adminSections.forEach((sec, index) => {
-    const opt = document.createElement('option');
-    opt.value = String(index);
-    opt.textContent = sec.cat || `Seção ${index + 1}`;
-    sel.appendChild(opt);
-  });
-}
+/**
+ * Monta (ou re-monta) o painel de flashcards dentro de #flashcards-container.
+ */
+function mountFlashcardsAdmin(sectionIndex = fcSectionIndex, cardIndex = fcCardIndex) {
+  fcSectionIndex = sectionIndex;
+  fcCardIndex    = cardIndex;
 
-async function addFlashcardFromAdmin() {
-  const sel = qs('flash-admin-section');
-  const qInp = qs('flash-admin-question');
-  const aInp = qs('flash-admin-answer');
+  renderFlashcardsView(adminSections, flashcards, {
+    currentSectionId:  sectionIndex,
+    currentCardIndex:  cardIndex,
+    isAdmin: true,
 
-  const sectionIndex = sel?.value || '0';
-  const question = qInp?.value.trim() || '';
-  const answer = aInp?.value.trim() || '';
+    onChangeSection: (idx) => mountFlashcardsAdmin(idx, 0),
+    onChangeCard:    (idx) => mountFlashcardsAdmin(sectionIndex, idx),
 
-  if (!question || !answer) {
-    toast('Preencha pergunta e resposta.', false);
-    return;
-  }
+    onCreateCard: async (idx, question, answer) => {
+      await addDoc(collection(db, 'flashcards'), {
+        sectionIndex: idx,
+        question,
+        answer,
+        createdAt: Date.now(),
+        createdBy: userCtx.user.uid
+      });
+      toast('Flashcard criado.', true);
+      await loadFlashcards();
+      mountFlashcardsAdmin(idx, 0);
+    },
 
-  await addDoc(collection(db, 'flashcards'), {
-    sectionIndex,
-    question,
-    answer,
-    createdAt: Date.now(),
-    createdBy: userCtx.user.uid
-  });
+    onEditCard: async (id, question, answer) => {
+      await updateDoc(doc(db, 'flashcards', id), { question, answer });
+      toast('Flashcard atualizado.', true);
+      await loadFlashcards();
+      mountFlashcardsAdmin(sectionIndex, cardIndex);
+    },
 
-  if (qInp) qInp.value = '';
-  if (aInp) aInp.value = '';
-
-  toast('Flashcard criado.', true);
-  await loadFlashcards();
-  renderFlashcardsAdminList();
-}
-
-function renderFlashcardsAdminList() {
-  const cont = qs('flash-admin-list');
-  if (!cont) return;
-
-  if (!flashcards.length) {
-    cont.innerHTML = '<p class="muted-msg">Nenhum flashcard cadastrado ainda.</p>';
-    return;
-  }
-
-  cont.innerHTML = '';
-  flashcards.forEach(card => {
-    const row = document.createElement('div');
-    row.className = 'flash-admin-row';
-
-    row.innerHTML = `
-      <div class="flash-admin-qa">
-        <strong>${card.question}</strong>
-        <span class="text-small text-muted">${card.answer}</span>
-      </div>
-      <button class="btn-secondary btn-sm" data-id="${card.id}" data-act="edit">Editar</button>
-      <button class="btn-danger btn-sm" data-id="${card.id}" data-act="del">Remover</button>
-    `;
-
-    cont.appendChild(row);
-  });
-
-  cont.querySelectorAll('button[data-act="del"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-id');
+    onDeleteCard: async (id) => {
       await deleteDoc(doc(db, 'flashcards', id));
       toast('Flashcard removido.', true);
       await loadFlashcards();
-      renderFlashcardsAdminList();
-    });
-  });
-
-  cont.querySelectorAll('button[data-act="edit"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = btn.getAttribute('data-id');
-      const card = flashcards.find(f => f.id === id);
-      if (!card) return;
-
-      const nq = prompt('Editar pergunta:', card.question);
-      if (nq === null) return;
-      const na = prompt('Editar resposta:', card.answer);
-      if (na === null) return;
-
-      await updateDoc(doc(db, 'flashcards', id), {
-        question: nq.trim(),
-        answer: na.trim()
-      });
-
-      toast('Flashcard atualizado.', true);
-      await loadFlashcards();
-      renderFlashcardsAdminList();
-    });
+      mountFlashcardsAdmin(sectionIndex, 0);
+    }
   });
 }
 
@@ -340,20 +313,17 @@ function renderFlashcardsAdminList() {
 function bindEvents() {
   qs('save-btn')?.addEventListener('click', saveCurriculum);
   qs('add-cat-btn')?.addEventListener('click', addCategory);
-  qs('flash-admin-add-btn')?.addEventListener('click', addFlashcardFromAdmin);
 }
 
-async function init() {
-  // garante que é admin
+export async function initConfigPage() {
   userCtx = await requireAuth({ requireAdmin: true });
 
   await loadCurriculum();
   renderAdminView();
   await loadFlashcards();
-  fillFlashcardSectionSelect();
-  renderFlashcardsAdminList();
+
+  // Monta o painel de flashcards com CRUD completo
+  mountFlashcardsAdmin(0, 0);
+
   bindEvents();
 }
-
-loader(true);
-init().finally(() => loader(false));

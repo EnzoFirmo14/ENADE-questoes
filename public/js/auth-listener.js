@@ -13,8 +13,8 @@ function handleAuthState() {
 
   onAuthStateChanged(auth, (user) => {
     const page = getCurrentPage();
-    const isIndex = page === '' || page === 'index.html';
-    const isChecklist = page === 'checklist.html';
+    const isIndex = page === '' || page === '/html/index.html';
+    const isChecklist = page === '/checklist.html';
 
     // Só para log de depuração:
     console.log('[auth-listener] page=', page, 'user=', !!user);

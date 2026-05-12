@@ -391,7 +391,7 @@ async function resetProgress() {
 // NAVEGAÇÃO E VISUALIZAÇÃO
 // ============================================
 function renderChecklistView() {
-  renderChecklist(curriculum, progress, toggleItem);
+  renderChecklist(curriculum.sections, progress, handleToggle, userDoc.course);
 
   if (!curriculum.length && qs('sections-container')) {
     qs('sections-container').innerHTML = `
@@ -431,7 +431,7 @@ function applyCourseFilter(courseValue, isAdmin) {
              sec.courses.includes(courseValue))
         );
 
-  renderChecklist(filtered, progress, toggleItem);
+  renderChecklist(curriculum.sections, progress, handleToggle, userDoc.course);
 
   if (!filtered.length && qs('sections-container')) {
     qs('sections-container').innerHTML = `

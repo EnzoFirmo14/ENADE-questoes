@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ENADE • Checklist</title>
+    <title>ENADE Checklist</title>
 
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
@@ -13,82 +13,82 @@
     <div class="toast" id="toast"></div>
 
     <nav class="topnav">
-        <div class="nav-brand">
-            <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
-            <span>ENA<span>DE</span></span>
-        </div>
+      <div class="nav-brand">
+        <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
+        <span>ENA<span>DE</span></span>
+      </div>
 
-        <!-- MENU DE CONTA NO TOPO (igual em todas as páginas) -->
-        <div class="account-menu">
-            <button
-            class="account-trigger"
-            id="account-trigger"
-            type="button"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="account-dropdown"
-            >
-            <span class="account-name" id="nav-user-email"></span>
-            <span class="account-chevron">▾</span>
+      <!-- MENU DE CONTA NO TOPO (igual em todas as páginas) -->
+      <div class="account-menu">
+        <button
+          class="account-trigger"
+          id="account-trigger"
+          type="button"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-controls="account-dropdown"
+        >
+          <span class="account-name" id="nav-user-email"></span>
+          <span class="account-chevron">▾</span>
+        </button>
+
+        <div class="account-dropdown" id="account-dropdown">
+          <div class="account-card">
+            <div class="account-card-head">
+              <strong>Minha conta</strong>
+              <span>Atualize seu nome e sua senha</span>
+            </div>
+
+            <div class="err-box" id="account-err" style="display:none"></div>
+
+            <div class="field">
+              <label for="account-email">Email</label>
+              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" />
+            </div>
+
+            <div class="field">
+              <label for="account-name-input">Nome</label>
+              <input id="account-name-input" type="text" placeholder="Seu nome" />
+            </div>
+
+            <div class="field">
+              <label for="account-course">Curso</label>
+              <select id="account-course" class="select-like">
+                <option value="">Selecione</option>
+                <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
+                <option value="SI">Sistemas de Informação</option>
+                <option value="EC">Engenharia da Computação</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="account-pass-input">Nova senha</label>
+              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" />
+            </div>
+
+            <div class="field">
+              <label for="account-pass-confirm-input">Confirmar nova senha</label>
+              <input
+                id="account-pass-confirm-input"
+                type="password"
+                placeholder="Digite a senha novamente"
+              />
+            </div>
+
+            <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
+              Salvar dados
             </button>
-
-            <div class="account-dropdown" id="account-dropdown">
-            <div class="account-card">
-                <div class="account-card-head">
-                <strong>Minha conta</strong>
-                <span>Atualize seu nome e sua senha</span>
-                </div>
-
-                <div class="err-box" id="account-err" style="display:none"></div>
-
-                <div class="field">
-                <label for="account-email">Email</label>
-                <input id="account-email" type="email" readonly placeholder="email@exemplo.com" />
-                </div>
-
-                <div class="field">
-                <label for="account-name-input">Nome</label>
-                <input id="account-name-input" type="text" placeholder="Seu nome" />
-                </div>
-
-                <div class="field">
-                <label for="account-course">Curso</label>
-                <select id="account-course" class="select-like">
-                    <option value="">Selecione</option>
-                    <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
-                    <option value="SI">Sistemas de Informação</option>
-                    <option value="EC">Engenharia da Computação</option>
-                </select>
-                </div>
-
-                <div class="field">
-                <label for="account-pass-input">Nova senha</label>
-                <input id="account-pass-input" type="password" placeholder="Digite a nova senha" />
-                </div>
-
-                <div class="field">
-                <label for="account-pass-confirm-input">Confirmar nova senha</label>
-                <input
-                    id="account-pass-confirm-input"
-                    type="password"
-                    placeholder="Digite a senha novamente"
-                />
-                </div>
-
-                <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
-                Salvar dados
-                </button>
-            </div>
-            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="nav-links">
-            <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
-            <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
-            <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
-            <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
-            <button class="nav-btn" id="logout-btn">Sair</button>
-        </div>
+      <div class="nav-links">
+        <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
+        <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
+        <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
+        <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
+        <button class="nav-btn" id="logout-btn">Sair</button>
+      </div>
     </nav>
 
     <main class="view active" id="page-checklist">
@@ -113,13 +113,13 @@
     </main>
 
     <script src="./js/env.js"></script>
+    <!-- Script principal do checklist (módulo) -->
     <script type="module">
-    import { initAccountMenu } from './js/account-menu.js';
-    import './js/checklist-page.js';
+      import { initAccountMenu } from './js/account-menu.js';
+      import { initChecklistPage } from './js/checklist-page.js';
 
-    // o checklist-page.js usa requireAuth também, então os dois vão compartilhar o mesmo estado
-    initAccountMenu();
+      initAccountMenu();
+      initChecklistPage();
     </script>
-    <script type="module" src="./js/checklist-page.js"></script>
   </body>
 </html>
