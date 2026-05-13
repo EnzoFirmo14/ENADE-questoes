@@ -2,23 +2,29 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ENADE Checklist</title>
-
-    <link rel="stylesheet" href="./css/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ENADE Revisão - Checklist interativo de estudos" />
+    <meta name="theme-color" content="#4f46e5" />
+    <title>ENADE Revisão - Checklist</title>
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <div id="loader"><div class="spin"></div></div>
-    <div class="toast" id="toast"></div>
+    <a href="#page-checklist" class="sr-only" style="position:absolute;top:0;left:0;z-index:9999;padding:1rem;background:var(--primary);color:#fff;">Pular para o conteúdo</a>
 
-    <nav class="topnav">
+    <div id="loader" role="status" aria-live="polite">
+      <div class="spinner spinner-lg" aria-label="Carregando"></div>
+    </div>
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true">
+      <div class="toast toast-info" id="toast" role="alert"></div>
+    </div>
+
+    <nav class="topnav" role="navigation" aria-label="Navegação principal">
       <div class="nav-brand">
         <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
         <span>ENA<span>DE</span></span>
       </div>
 
-      <!-- MENU DE CONTA NO TOPO (igual em todas as páginas) -->
       <div class="account-menu">
         <button
           class="account-trigger"
@@ -27,28 +33,29 @@
           aria-expanded="false"
           aria-haspopup="true"
           aria-controls="account-dropdown"
+          aria-label="Menu da conta"
         >
           <span class="account-name" id="nav-user-email"></span>
-          <span class="account-chevron">▾</span>
+          <span class="account-chevron" aria-hidden="true">▾</span>
         </button>
 
-        <div class="account-dropdown" id="account-dropdown">
+        <div class="account-dropdown" id="account-dropdown" role="menu">
           <div class="account-card">
             <div class="account-card-head">
               <strong>Minha conta</strong>
               <span>Atualize seu nome e sua senha</span>
             </div>
 
-            <div class="err-box" id="account-err" style="display:none"></div>
+            <div class="err-box" id="account-err" role="alert" style="display:none"></div>
 
             <div class="field">
               <label for="account-email">Email</label>
-              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" />
+              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" aria-readonly="true" />
             </div>
 
             <div class="field">
               <label for="account-name-input">Nome</label>
-              <input id="account-name-input" type="text" placeholder="Seu nome" />
+              <input id="account-name-input" type="text" placeholder="Seu nome" autocomplete="name" />
             </div>
 
             <div class="field">
@@ -63,16 +70,12 @@
 
             <div class="field">
               <label for="account-pass-input">Nova senha</label>
-              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" />
+              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
             </div>
 
             <div class="field">
               <label for="account-pass-confirm-input">Confirmar nova senha</label>
-              <input
-                id="account-pass-confirm-input"
-                type="password"
-                placeholder="Digite a senha novamente"
-              />
+              <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
             </div>
 
             <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
@@ -83,15 +86,15 @@
       </div>
 
       <div class="nav-links">
-        <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
+        <a class="nav-btn active" href="./checklist.html" aria-current="page">📋 Checklist</a>
         <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
         <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
         <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
-        <button class="nav-btn" id="logout-btn">Sair</button>
+        <button class="nav-btn" id="logout-btn" type="button">Sair</button>
       </div>
     </nav>
 
-    <main class="view active" id="page-checklist">
+    <main class="view active" id="page-checklist" role="main">
       <div class="wrap">
         <section class="hero">
           <div class="hero-tag">Revisão rápida</div>
@@ -99,23 +102,20 @@
           <p id="hero-greeting">Bom estudo!</p>
         </section>
 
-        <section class="prog-bar-wrap">
+        <section class="prog-bar-wrap" aria-label="Progresso do checklist">
           <span class="prog-nums" id="prog-nums">0 / 0</span>
-          <div class="prog-track">
+          <div class="prog-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
             <div class="prog-fill" id="prog-fill" style="width:0%"></div>
           </div>
           <span class="prog-pct" id="prog-pct">0%</span>
-          <button class="reset-btn" id="reset-progress-btn">Reiniciar</button>
+          <button class="reset-btn" id="reset-progress-btn" type="button" aria-label="Reiniciar progresso">Reiniciar</button>
         </section>
 
-        <section id="sections-container"></section>
+        <section id="sections-container" aria-label="Categorias do checklist"></section>
       </div>
     </main>
 
-    <!-- 1) env.js: preenche window.__ENV__ -->
     <script src="./js/core/env.js"></script>
-
-    <!-- 2) entrypoint da página (módulo) -->
     <script type="module">
       import { initAccountMenu } from './js/components/account-menu.js';
       import { initChecklistPage } from './js/page/checklist-page.js';

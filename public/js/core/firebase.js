@@ -1,14 +1,16 @@
 // js/firebase.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getAuth,
+  setPersistence,
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile,
   updatePassword
-} from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore,
   doc,
@@ -25,7 +27,7 @@ import {
   serverTimestamp,
   arrayUnion,
   arrayRemove
-} from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // lê env.js
 const __ENV = (typeof window !== 'undefined' && window.__ENV__) ? window.__ENV__ : {};
@@ -39,14 +41,29 @@ const firebaseConfig = {
   appId: __ENV.VITE_FIREBASE_APP_ID
 };
 
+// Validate config before initializing
+const missingKeys = Object.entries(firebaseConfig)
+  .filter(([, v]) => !v || v === '' || v === 'undefined')
+  .map(([k]) => k);
+
+if (missingKeys.length > 0) {
+  console.error('[Firebase] Missing config keys:', missingKeys.join(', '));
+  console.error('[Firebase] Ensure .env file exists and npm run build was executed.');
+}
+
 let app, auth, db;
 
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   db = getFirestore(app);
+
+  // Set persistence explicitly
+  setPersistence(auth, browserLocalPersistence).catch(err => {
+    console.warn('[Firebase] Persistence setup failed:', err.message);
+  });
 } catch (error) {
-  console.error('Erro ao inicializar Firebase:', error);
+  console.error('[Firebase] Initialization error:', error);
   throw error;
 }
 

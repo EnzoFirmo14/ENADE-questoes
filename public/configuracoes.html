@@ -2,23 +2,29 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ENADE Configurações</title>
- 
-    <link rel="stylesheet" href="./css/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ENADE Revisão - Painel de configurações administrativas" />
+    <meta name="theme-color" content="#4f46e5" />
+    <title>ENADE Revisão - Configurações</title>
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <div id="loader"><div class="spin"></div></div>
-    <div class="toast" id="toast"></div>
- 
-    <nav class="topnav">
+    <a href="#page-config" class="sr-only" style="position:absolute;top:0;left:0;z-index:9999;padding:1rem;background:var(--primary);color:#fff;">Pular para o conteúdo</a>
+
+    <div id="loader" role="status" aria-live="polite">
+      <div class="spinner spinner-lg" aria-label="Carregando"></div>
+    </div>
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true">
+      <div class="toast toast-info" id="toast" role="alert"></div>
+    </div>
+
+    <nav class="topnav" role="navigation" aria-label="Navegação principal">
       <div class="nav-brand">
         <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
         <span>ENA<span>DE</span></span>
       </div>
- 
-      <!-- MENU DE CONTA NO TOPO -->
+
       <div class="account-menu">
         <button
           class="account-trigger"
@@ -27,30 +33,31 @@
           aria-expanded="false"
           aria-haspopup="true"
           aria-controls="account-dropdown"
+          aria-label="Menu da conta"
         >
           <span class="account-name" id="nav-user-email"></span>
-          <span class="account-chevron">▾</span>
+          <span class="account-chevron" aria-hidden="true">▾</span>
         </button>
- 
-        <div class="account-dropdown" id="account-dropdown">
+
+        <div class="account-dropdown" id="account-dropdown" role="menu">
           <div class="account-card">
             <div class="account-card-head">
               <strong>Minha conta</strong>
               <span>Atualize seu nome e sua senha</span>
             </div>
- 
-            <div class="err-box" id="account-err" style="display:none"></div>
- 
+
+            <div class="err-box" id="account-err" role="alert" style="display:none"></div>
+
             <div class="field">
               <label for="account-email">Email</label>
-              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" />
+              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" aria-readonly="true" />
             </div>
- 
+
             <div class="field">
               <label for="account-name-input">Nome</label>
-              <input id="account-name-input" type="text" placeholder="Seu nome" />
+              <input id="account-name-input" type="text" placeholder="Seu nome" autocomplete="name" />
             </div>
- 
+
             <div class="field">
               <label for="account-course">Curso</label>
               <select id="account-course" class="select-like">
@@ -60,83 +67,71 @@
                 <option value="EC">Engenharia da Computação</option>
               </select>
             </div>
- 
+
             <div class="field">
               <label for="account-pass-input">Nova senha</label>
-              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" />
+              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
             </div>
- 
+
             <div class="field">
               <label for="account-pass-confirm-input">Confirmar nova senha</label>
-              <input
-                id="account-pass-confirm-input"
-                type="password"
-                placeholder="Digite a senha novamente"
-              />
+              <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
             </div>
- 
+
             <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
               Salvar dados
             </button>
           </div>
         </div>
       </div>
- 
+
       <div class="nav-links">
         <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
         <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
-        <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
+        <a class="nav-btn active" href="./configuracoes.html" aria-current="page">⚙ Configurações</a>
         <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
-        <button class="nav-btn" id="logout-btn">Sair</button>
+        <button class="nav-btn" id="logout-btn" type="button">Sair</button>
       </div>
     </nav>
- 
-    <main class="view active" id="page-config">
+
+    <main class="view active" id="page-config" role="main">
       <div class="admin-wrap">
- 
-        <!-- Cabeçalho do painel admin -->
+
         <div class="admin-header">
           <div>
             <h2>Painel Admin</h2>
             <p>Edite categorias e itens do checklist</p>
           </div>
-          <button class="save-btn" id="save-btn">Salvar alterações</button>
+          <button class="save-btn" id="save-btn" type="button">Salvar alterações</button>
         </div>
- 
-        <!-- Caixa de nova categoria -->
+
         <div class="add-cat-box">
-          <input id="new-cat-input" placeholder="Nome da nova categoria..." />
-          <select id="new-cat-prio" class="generic-select">
+          <input id="new-cat-input" placeholder="Nome da nova categoria..." aria-label="Nome da nova categoria" />
+          <select id="new-cat-prio" class="generic-select" aria-label="Prioridade">
             <option value="obrigatório">obrigatório</option>
             <option value="importante">importante</option>
             <option value="revisar">revisar</option>
             <option value="atenção máxima">atenção máxima</option>
           </select>
-          <button class="add-cat-btn" id="add-cat-btn">+ Categoria</button>
+          <button class="add-cat-btn" id="add-cat-btn" type="button">+ Categoria</button>
         </div>
- 
-        <!-- Lista de categorias / itens (renderizada via JS) -->
-        <div id="admin-sections"></div>
- 
-        <!-- Divisor -->
+
+        <div id="admin-sections" aria-label="Categorias"></div>
+
         <div class="divider" style="margin-top:24px;margin-bottom:24px;"></div>
- 
-        <!--
-          Painel de gerenciamento de flashcards (CRUD completo).
-          renderFlashcardsAdmin() em config-page.js renderiza aqui.
-        -->
-        <div id="admin-flashcards-container"></div>
- 
+
+        <div id="admin-flashcards-container" aria-label="Gerenciamento de flashcards"></div>
+
       </div>
     </main>
- 
-    <script src="./js/env.js"></script>
- 
+
+    <script src="./js/core/env.js"></script>
+
     <script type="module">
-      import { initAccountMenu } from './js/account-menu.js';
-      import { initConfigPage } from './js/config-page.js';
-      import { loader } from './js/ui.js';
- 
+      import { initAccountMenu } from './js/components/account-menu.js';
+      import { initConfigPage } from './js/page/config-page.js';
+      import { loader } from './js/core/ui.js';
+
       (async () => {
         try {
           loader(true);

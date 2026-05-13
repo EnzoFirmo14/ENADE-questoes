@@ -3,7 +3,7 @@
 // VIEW - ADMINISTRAÇÃO
 // ============================================
  
-import { qs } from '../core/ui.js';
+import { qs, escapeHtml } from '../core/ui.js';
 import { CATEGORY_COLORS } from '../core/constants.js';
  
 /**
@@ -30,7 +30,7 @@ export function renderAdminItems(adminSections, si, handlers) {
     const row = document.createElement('div');
     row.className = 'admin-item-row';
     row.innerHTML = `
-      <span class="admin-item-txt">${txt}</span>
+      <span class="admin-item-txt">${escapeHtml(txt)}</span>
       <button class="icon-btn edit" data-edit-item="${si}-${ii}">✎</button>
       <button class="icon-btn del" data-remove-item="${si}-${ii}">✕</button>
     `;
@@ -70,7 +70,7 @@ export function renderAdmin(adminSections, handlers) {
     div.innerHTML = `
       <div class="admin-sec-head" data-head="${si}">
         <span class="cat-dot" style="background:${sec.color}"></span>
-        <span class="admin-sec-title">☰ ${sec.cat}</span>
+        <span class="admin-sec-title">☰ ${escapeHtml(sec.cat)}</span>
         <select class="prio-select" data-prio="${si}">
           ${['obrigatório', 'importante', 'revisar', 'atenção máxima']
             .map(p => `<option${p === sec.prio ? ' selected' : ''}>${p}</option>`)

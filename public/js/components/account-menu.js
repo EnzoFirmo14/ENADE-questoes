@@ -1,4 +1,4 @@
-// js/account-menu.js
+// js/components/account-menu.js
 import {
   auth,
   db,
@@ -8,12 +8,29 @@ import {
   updateDoc,
   updateProfile,
   updatePassword
-} from './core/firebase.js';
-import { requireAuth } from './core/auth-common.js';
-import { qs, toast, loader } from './core/ui.js';
+} from '../core/firebase.js';
+import { requireAuth } from '../core/auth-common.js';
+import { qs, toast, loader } from '../core/ui.js';
 
 let currentUser = null;
 let userDoc = null;
+let dropdownOpen = false;
+
+function openDropdown(trigger, dropdown) {
+  dropdownOpen = true;
+  dropdown.classList.add('open');
+  trigger.setAttribute('aria-expanded', 'true');
+  // Focus first input for a11y
+  const firstInput = dropdown.querySelector('input:not([readonly]), select');
+  if (firstInput) firstInput.focus();
+}
+
+function closeDropdown(trigger, dropdown) {
+  dropdownOpen = false;
+  dropdown.classList.remove('open');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.focus();
+}
 
 function bindAccountMenuEvents() {
   const trigger = qs('account-trigger');
@@ -22,11 +39,15 @@ function bindAccountMenuEvents() {
 
   if (!trigger || !dropdown || !saveBtn) return;
 
-  trigger.addEventListener('click', e => {
+  // Toggle dropdown
+  trigger.addEventListener('click', (e) => {
     e.stopPropagation();
-    const isOpen = dropdown.classList.toggle('open');
-    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-
+    if (dropdownOpen) {
+      closeDropdown(trigger, dropdown);
+    } else {
+      openDropdown(trigger, dropdown);
+    }
+    // Clear errors on open
     const err = qs('account-err');
     if (err) {
       err.style.display = 'none';
@@ -34,23 +55,52 @@ function bindAccountMenuEvents() {
     }
   });
 
-  dropdown.addEventListener('click', e => {
-    e.stopPropagation();
-  });
+  // Prevent dropdown click from closing
+  dropdown.addEventListener('click', (e) => e.stopPropagation());
 
-  document.addEventListener('click', e => {
-    if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
-      dropdown.classList.remove('open');
-      trigger.setAttribute('aria-expanded', 'false');
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (dropdownOpen && !dropdown.contains(e.target) && !trigger.contains(e.target)) {
+      closeDropdown(trigger, dropdown);
     }
   });
 
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dropdownOpen) {
+      closeDropdown(trigger, dropdown);
+    }
+  });
+
+  // Save button
   saveBtn.addEventListener('click', saveAccountData);
 
+  // Keyboard trap within dropdown when open
+  dropdown.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && dropdownOpen) {
+      const focusable = dropdown.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  // Logout button
   const logoutBtn = qs('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.error('[account-menu] erro no logout', e);
+      }
       window.location.href = './index.html';
     });
   }
@@ -76,7 +126,8 @@ async function saveAccountData() {
   if (!newName) {
     if (errBox) {
       errBox.textContent = 'Informe seu nome.';
-      errBox.style.display = 'block';
+      errBox.style.display = 'flex';
+      errBox.classList.add('show');
     }
     return;
   }
@@ -85,7 +136,8 @@ async function saveAccountData() {
     if (newPass.length < 6) {
       if (errBox) {
         errBox.textContent = 'A nova senha deve ter pelo menos 6 caracteres.';
-        errBox.style.display = 'block';
+        errBox.style.display = 'flex';
+        errBox.classList.add('show');
       }
       return;
     }
@@ -93,7 +145,8 @@ async function saveAccountData() {
     if (newPass !== confirmPass) {
       if (errBox) {
         errBox.textContent = 'As senhas não coincidem.';
-        errBox.style.display = 'block';
+        errBox.style.display = 'flex';
+        errBox.classList.add('show');
       }
       return;
     }
@@ -130,7 +183,8 @@ async function saveAccountData() {
 
     if (errBox) {
       errBox.textContent = msg;
-      errBox.style.display = 'block';
+      errBox.style.display = 'flex';
+      errBox.classList.add('show');
     }
   } finally {
     loader(false);
@@ -138,7 +192,6 @@ async function saveAccountData() {
 }
 
 async function initAccountMenu() {
-  // garante que só entra aqui se estiver autenticado
   const { user } = await requireAuth();
   currentUser = user;
 
@@ -151,7 +204,7 @@ async function initAccountMenu() {
 
   userDoc = snap.data();
 
-  // preenche os campos da conta
+  // Fill account fields
   if (qs('nav-user-email')) qs('nav-user-email').textContent = userDoc.name || user.email;
   if (qs('account-email')) qs('account-email').value = userDoc.email || user.email;
   if (qs('account-name-input')) qs('account-name-input').value = userDoc.name || '';

@@ -6,12 +6,14 @@ import {
   collection,
   getDocs,
   doc,
-  getDoc
-} from './core/firebase.js';
-import { requireAuth } from './core/auth-common.js';
-import { qs, toast, loader } from './core/ui.js';
-import { totalItems } from './views/checklist.js';
-import { renderUsersList } from './views/users.js';  // IMPORTANTE
+  getDoc,
+  updateDoc,
+  deleteDoc
+} from '../core/firebase.js';
+import { requireAuth } from '../core/auth-common.js';
+import { qs, toast } from '../core/ui.js';
+import { totalItems } from '../views/checklist.js';
+import { renderUsersList } from '../views/users.js';
 
 let currentUser = null;
 let userDoc = null;
@@ -20,20 +22,28 @@ function bindEvents() {
   const logoutBtn = qs('logout-btn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', async () => {
-      await signOut(auth);
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.error('[usuarios] logout error', e);
+      }
       window.location.href = './index.html';
     });
   }
 }
 
-// mesma forma que o app antigo faz
 async function loadCurriculum() {
-  const ref = doc(db, 'curriculum', 'main');
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return 0;
-  const data = snap.data();
-  const curriculum = data.sections || [];
-  return totalItems(curriculum);
+  try {
+    const ref = doc(db, 'curriculum', 'main');
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return 0;
+    const data = snap.data();
+    const curriculum = data.sections || [];
+    return totalItems(curriculum);
+  } catch (e) {
+    console.error('[usuarios] carregar currículo', e);
+    return 0;
+  }
 }
 
 async function loadUsersView() {
@@ -61,19 +71,59 @@ async function loadUsersView() {
   }
 }
 
-// essas duas funções já existem no app original; copie-as de lá se ainda não estiverem
 async function onEditUser(uid) {
-  // aqui você pode reusar exatamente o openEditUserModal / fluxo antigo
-  // ou simplificar com prompt como fizemos antes
+  try {
+    const userRef = doc(db, 'users', uid);
+    const snap = await getDoc(userRef);
+    if (!snap.exists()) {
+      toast('Usuário não encontrado.', false);
+      return;
+    }
+    const data = snap.data();
+
+    const newName = prompt('Nome:', data.name || '');
+    if (newName === null) return;
+
+    const newCourse = prompt('Curso:', data.course || '');
+    if (newCourse === null) return;
+
+    const newIsAdmin = confirm('É administrador? OK = Sim, Cancelar = Não');
+    const newDisabled = confirm('Desativar usuário? OK = Sim, Cancelar = Não');
+
+    await updateDoc(userRef, {
+      name: newName.trim() || data.name,
+      course: newCourse.trim(),
+      isAdmin: newIsAdmin,
+      disabled: newDisabled
+    });
+
+    toast('Usuário atualizado com sucesso.', true);
+    await loadUsersView();
+  } catch (e) {
+    console.error('[usuarios] erro ao editar usuário', e);
+    toast('Erro ao editar usuário.', false);
+  }
 }
 
 async function onRemoveUser(uid) {
-  // reusa a lógica antiga de marcar disabled: true
+  if (!confirm('Tem certeza que deseja remover este usuário? Esta ação não pode ser desfeita.')) {
+    return;
+  }
+  try {
+    await deleteDoc(doc(db, 'users', uid));
+    toast('Usuário removido com sucesso.', true);
+    await loadUsersView();
+  } catch (e) {
+    console.error('[usuarios] erro ao remover usuário', e);
+    toast('Erro ao remover usuário.', false);
+  }
 }
 
+// Init
 async function init() {
   bindEvents();
 
+  // requireAuth already handles loader internally
   const ctx = await requireAuth({ requireAdmin: true });
   currentUser = ctx.user;
   userDoc = ctx.userDoc;
@@ -85,5 +135,4 @@ async function init() {
   await loadUsersView();
 }
 
-loader(true);
-init().finally(() => loader(false));
+init();

@@ -1,20 +1,28 @@
-/* ================= ENADE Questões - Main Stylesheet ================= */
-/* Organized by functionality and usage context */
+/* ============================================
+   ENADE QUESTÕES - MAIN STYLESHEET
+   Import order matters!
+   ============================================ */
 
-/* Base styles and variables (must come first) */
+/* 1. Design Tokens */
 @import url('./variables.css');
+
+/* 2. Base / Reset */
 @import url('./base.css');
 
-/* Component-specific styles */
+/* 3. Design System (components, buttons, cards, forms) */
+@import url('./design-system.css');
+
+/* 4. Components (navbar, sidebar, etc.) */
+@import url('./components.css');
+
+/* 5. Page-specific styles */
 @import url('./auth.css');
 @import url('./navbar.css');
+@import url('./custom-select.css');
+@import url('./flashcards.css');
 @import url('./checklist.css');
 @import url('./admin.css');
 @import url('./users.css');
-@import url('./components.css');
-@import url('./custom-select.css');
-@import url('./flashcards.css');
-@import url('./design-system.css');
 
-/* Responsive styles (must come last) */
+/* 6. Responsive (always last) */
 @import url('./responsive.css');

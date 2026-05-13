@@ -1,6 +1,6 @@
 // js/auth-listener.js
-import { auth, onAuthStateChanged } from './core/firebase.js';
-import { loader, clearErr } from './core/ui.js';
+import { auth, onAuthStateChanged } from './firebase.js';
+import { loader, clearErr } from './ui.js';
 
 function getCurrentPage() {
   const path = window.location.pathname;
@@ -13,8 +13,8 @@ function handleAuthState() {
 
   onAuthStateChanged(auth, (user) => {
     const page = getCurrentPage();
-    const isIndex = page === '' || page === '/html/index.html';
-    const isChecklist = page === '/checklist.html';
+    const isIndex = page === '' || page === 'index.html';
+    const isChecklist = page === 'checklist.html';
 
     // Só para log de depuração:
     console.log('[auth-listener] page=', page, 'user=', !!user);

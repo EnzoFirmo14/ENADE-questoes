@@ -2,60 +2,91 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ENADE Login</title>
-
-    <link rel="stylesheet" href="./css/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ENADE Revisão - Plataforma de estudos para o ENADE com flashcards e checklist" />
+    <meta name="theme-color" content="#4f46e5" />
+    <title>ENADE Revisão - Login</title>
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <div id="loader"><div class="spin"></div></div>
-    <div class="toast" id="toast"></div>
+    <!-- Skip link for accessibility -->
+    <a href="#auth-screen" class="sr-only" style="position:absolute;top:0;left:0;z-index:9999;padding:1rem;background:var(--primary);color:#fff;">Pular para o conteúdo</a>
 
-    <div id="auth-screen" class="screen active">
+    <!-- Loading overlay -->
+    <div id="loader" role="status" aria-live="polite">
+      <div class="spinner spinner-lg" aria-label="Carregando"></div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true">
+      <div class="toast toast-info" id="toast" role="alert"></div>
+    </div>
+
+    <!-- Auth screen -->
+    <div id="auth-screen" class="screen active" role="main" aria-label="Autenticação">
       <div class="auth-card">
-        <div class="auth-logo">ENADE Revisão</div>
-        <h1 class="auth-title">Checklist</h1>
-        <p class="auth-sub">Entre para acompanhar seu progresso.</p>
+        <header class="auth-header">
+          <div class="auth-logo" aria-hidden="true">📚</div>
+          <h1 class="auth-title">ENADE Revisão</h1>
+          <p class="auth-subtitle">Entre para acompanhar seu progresso nos estudos.</p>
+        </header>
 
-        <div class="tabs">
-          <button class="tab on" id="tab-login">Entrar</button>
-          <button class="tab" id="tab-reg">Criar conta</button>
+        <!-- Tabs -->
+        <div class="tabs" role="tablist" aria-label="Tipo de autenticação">
+          <button class="tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="login-panel">Entrar</button>
+          <button class="tab" id="tab-reg" role="tab" aria-selected="false" aria-controls="reg-panel">Criar conta</button>
         </div>
 
-        <div class="err-box" id="auth-err" style="display:none"></div>
-
-        <div class="field" id="name-field" style="display:none">
-          <label for="inp-name">Nome</label>
-          <input id="inp-name" type="text" placeholder="Seu nome" />
+        <!-- Error/Success messages -->
+        <div class="auth-error" id="auth-err" role="alert" aria-live="assertive">
+          <span aria-hidden="true">⚠️</span>
+          <span id="auth-err-text"></span>
+        </div>
+        <div class="auth-success" id="auth-success" role="status" aria-live="polite">
+          <span aria-hidden="true">✅</span>
+          <span id="auth-success-text"></span>
         </div>
 
-        <div class="field" id="course-field" style="display:none">
-          <label for="inp-course">Curso</label>
-          <select id="inp-course" class="select-like">
-            <option value="">Selecione</option>
-            <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
-            <option value="SI">Sistemas de Informação</option>
-            <option value="EC">Engenharia da Computação</option>
-          </select>
-        </div>
+        <!-- Login/Register form -->
+        <form class="auth-form" id="auth-form" novalidate>
+          <div class="form-group" id="name-field" style="display:none">
+            <label class="form-label" for="inp-name">Nome</label>
+            <input class="form-input" id="inp-name" type="text" placeholder="Seu nome completo" autocomplete="name" aria-required="false" />
+          </div>
 
-        <div class="field">
-          <label for="inp-email">Email</label>
-          <input id="inp-email" type="email" placeholder="seuemail@exemplo.com" />
-        </div>
+          <div class="form-group" id="course-field" style="display:none">
+            <label class="form-label" for="inp-course">Curso</label>
+            <select class="form-select" id="inp-course" aria-required="false">
+              <option value="">Selecione seu curso</option>
+              <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
+              <option value="SI">Sistemas de Informação</option>
+              <option value="EC">Engenharia da Computação</option>
+            </select>
+          </div>
 
-        <div class="field">
-          <label for="inp-pass">Senha</label>
-          <input id="inp-pass" type="password" placeholder="Digite sua senha" />
-        </div>
+          <div class="form-group">
+            <label class="form-label" for="inp-email">Email</label>
+            <input class="form-input" id="inp-email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required aria-required="true" />
+          </div>
 
-        <div class="field" id="confirm-pass-field" style="display:none">
-          <label for="inp-pass-confirm">Confirmar senha</label>
-          <input id="inp-pass-confirm" type="password" placeholder="Digite novamente" />
-        </div>
+          <div class="form-group">
+            <label class="form-label" for="inp-pass">Senha</label>
+            <div class="password-field">
+              <input class="form-input" id="inp-pass" type="password" placeholder="Digite sua senha" autocomplete="current-password" required aria-required="true" />
+              <button type="button" class="password-toggle" id="toggle-pass" aria-label="Mostrar senha">👁️</button>
+            </div>
+          </div>
 
-        <button class="btn-primary" id="auth-btn">Entrar</button>
+          <div class="form-group" id="confirm-pass-field" style="display:none">
+            <label class="form-label" for="inp-pass-confirm">Confirmar senha</label>
+            <input class="form-input" id="inp-pass-confirm" type="password" placeholder="Digite novamente" autocomplete="new-password" aria-required="false" />
+          </div>
+
+          <button class="btn btn-primary btn-lg btn-full" id="auth-btn" type="submit">
+            Entrar
+          </button>
+        </form>
       </div>
     </div>
 

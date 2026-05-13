@@ -9,16 +9,16 @@ import {
   getDocs,
   addDoc,
   deleteDoc
-} from './core/firebase.js';
-import { requireAuth } from './core/auth-common.js';
-import { qs, toast } from './core/ui.js';
+} from '../core/firebase.js';
+import { requireAuth } from '../core/auth-common.js';
+import { qs, toast } from '../core/ui.js';
 import {
   renderAdmin,
   renderAdminItems,
   toggleAdminSec,
   nextCategoryColor
-} from './views/admin.js';
-import { renderFlashcardsView } from './views/flashcards.js';
+} from '../views/admin.js';
+import { renderFlashcardsView } from '../views/flashcards.js';
 
 let userCtx            = null;
 let adminSections      = [];

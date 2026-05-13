@@ -2,96 +2,99 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>ENADE Usuários</title>
-
-    <link rel="stylesheet" href="./css/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="ENADE Revisão - Gerenciamento de usuários" />
+    <meta name="theme-color" content="#4f46e5" />
+    <title>ENADE Revisão - Usuários</title>
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
+    <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <div id="loader"><div class="spin"></div></div>
-    <div class="toast" id="toast"></div>
+    <a href="#page-users" class="sr-only" style="position:absolute;top:0;left:0;z-index:9999;padding:1rem;background:var(--primary);color:#fff;">Pular para o conteúdo</a>
 
-    <nav class="topnav">
-        <div class="nav-brand">
-            <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
-            <span>ENA<span>DE</span></span>
-        </div>
+    <div id="loader" role="status" aria-live="polite">
+      <div class="spinner spinner-lg" aria-label="Carregando"></div>
+    </div>
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true">
+      <div class="toast toast-info" id="toast" role="alert"></div>
+    </div>
 
-        <!-- MENU DE CONTA NO TOPO (igual em todas as páginas) -->
-        <div class="account-menu">
-            <button
-            class="account-trigger"
-            id="account-trigger"
-            type="button"
-            aria-expanded="false"
-            aria-haspopup="true"
-            aria-controls="account-dropdown"
-            >
-            <span class="account-name" id="nav-user-email"></span>
-            <span class="account-chevron">▾</span>
+    <nav class="topnav" role="navigation" aria-label="Navegação principal">
+      <div class="nav-brand">
+        <img src="./assets/Imagem Site Enade.png" alt="Logo ENADE" class="nav-logo" />
+        <span>ENA<span>DE</span></span>
+      </div>
+
+      <div class="account-menu">
+        <button
+          class="account-trigger"
+          id="account-trigger"
+          type="button"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-controls="account-dropdown"
+          aria-label="Menu da conta"
+        >
+          <span class="account-name" id="nav-user-email"></span>
+          <span class="account-chevron" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="account-dropdown" id="account-dropdown" role="menu">
+          <div class="account-card">
+            <div class="account-card-head">
+              <strong>Minha conta</strong>
+              <span>Atualize seu nome e sua senha</span>
+            </div>
+
+            <div class="err-box" id="account-err" role="alert" style="display:none"></div>
+
+            <div class="field">
+              <label for="account-email">Email</label>
+              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" aria-readonly="true" />
+            </div>
+
+            <div class="field">
+              <label for="account-name-input">Nome</label>
+              <input id="account-name-input" type="text" placeholder="Seu nome" autocomplete="name" />
+            </div>
+
+            <div class="field">
+              <label for="account-course">Curso</label>
+              <select id="account-course" class="select-like">
+                <option value="">Selecione</option>
+                <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
+                <option value="SI">Sistemas de Informação</option>
+                <option value="EC">Engenharia da Computação</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="account-pass-input">Nova senha</label>
+              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
+            </div>
+
+            <div class="field">
+              <label for="account-pass-confirm-input">Confirmar nova senha</label>
+              <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
+            </div>
+
+            <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
+              Salvar dados
             </button>
-
-            <div class="account-dropdown" id="account-dropdown">
-            <div class="account-card">
-                <div class="account-card-head">
-                <strong>Minha conta</strong>
-                <span>Atualize seu nome e sua senha</span>
-                </div>
-
-                <div class="err-box" id="account-err" style="display:none"></div>
-
-                <div class="field">
-                <label for="account-email">Email</label>
-                <input id="account-email" type="email" readonly placeholder="email@exemplo.com" />
-                </div>
-
-                <div class="field">
-                <label for="account-name-input">Nome</label>
-                <input id="account-name-input" type="text" placeholder="Seu nome" />
-                </div>
-
-                <div class="field">
-                <label for="account-course">Curso</label>
-                <select id="account-course" class="select-like">
-                    <option value="">Selecione</option>
-                    <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
-                    <option value="SI">Sistemas de Informação</option>
-                    <option value="EC">Engenharia da Computação</option>
-                </select>
-                </div>
-
-                <div class="field">
-                <label for="account-pass-input">Nova senha</label>
-                <input id="account-pass-input" type="password" placeholder="Digite a nova senha" />
-                </div>
-
-                <div class="field">
-                <label for="account-pass-confirm-input">Confirmar nova senha</label>
-                <input
-                    id="account-pass-confirm-input"
-                    type="password"
-                    placeholder="Digite a senha novamente"
-                />
-                </div>
-
-                <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
-                Salvar dados
-                </button>
-            </div>
-            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="nav-links">
-            <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
-            <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
-            <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
-            <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
-            <button class="nav-btn" id="logout-btn">Sair</button>
-        </div>
+      <div class="nav-links">
+        <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
+        <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
+        <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
+        <a class="nav-btn active" href="./usuarios.html" aria-current="page">👥 Usuários</a>
+        <button class="nav-btn" id="logout-btn" type="button">Sair</button>
+      </div>
     </nav>
 
-    <main class="view active" id="page-users">
+    <main class="view active" id="page-users" role="main">
       <div class="wrap">
         <section class="hero">
           <div class="hero-tag">Painel Admin</div>
@@ -99,24 +102,27 @@
           <p>Veja o progresso dos alunos no checklist.</p>
         </section>
 
-        <section class="card">
-          <h2>Lista de usuários</h2>
-          <div id="users-list">
-            <p class="muted-msg">Carregando...</p>
+        <section class="card" aria-label="Lista de usuários">
+          <div class="card-header">
+            <h2>Lista de usuários</h2>
+          </div>
+          <div class="card-body">
+            <div id="users-list">
+              <p class="muted-msg">Carregando...</p>
+            </div>
           </div>
         </section>
       </div>
     </main>
 
-    <script src="./js/env.js"></script>
+    <script src="./js/core/env.js"></script>
     <script type="module">
-    import { initAccountMenu } from './js/account-menu.js';
-    import { loader } from './js/ui.js';
+      import { initAccountMenu } from './js/components/account-menu.js';
+      import { loader } from './js/core/ui.js';
 
-    // inicia o menu de conta; se a página tiver lógica extra, você pode chamar depois
-    loader(true);
-    initAccountMenu().finally(() => loader(false));
+      loader(true);
+      initAccountMenu().finally(() => loader(false));
     </script>
-    <script type="module" src="./js/usuarios-page.js"></script>
+    <script type="module" src="./js/page/usuarios-page.js"></script>
   </body>
 </html>

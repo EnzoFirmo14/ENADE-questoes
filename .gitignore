@@ -12,6 +12,9 @@
 public/config.js
 config.js
 
+# Generated env file (contains Firebase keys)
+public/js/core/env.js
+
 # ============================================
 # FIREBASE
 # ============================================

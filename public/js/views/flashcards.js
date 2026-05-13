@@ -1,16 +1,11 @@
 // js/views/flashcards.js
-import { qs } from '../core/ui.js';
+import { qs, escapeHtml } from '../core/ui.js';
 
 /**
  * Renderiza a tela de flashcards.
- * sections: currículo filtrado (mesmas sections do checklist)
- * cards: array de flashcards vindos do Firestore
- * handlers: callbacks pra criar card, trocar matéria, editar, excluir e navegar.
  */
 export function renderFlashcardsView(sections, cards, handlers) {
   const isAdmin = !!handlers.isAdmin;
-
-  // Usa container diferente para admin x aluno
   const containerId = isAdmin ? 'admin-flashcards-container' : 'flashcards-container';
   const cont = document.getElementById(containerId);
   if (!cont) return;
@@ -25,24 +20,22 @@ export function renderFlashcardsView(sections, cards, handlers) {
     return;
   }
 
-  const currentSectionId =
-    typeof handlers.currentSectionId === 'number' ? handlers.currentSectionId : 0;
-  const currentCardIndex =
-    typeof handlers.currentCardIndex === 'number' ? handlers.currentCardIndex : 0;
+  const currentSectionId = typeof handlers.currentSectionId === 'number' ? handlers.currentSectionId : 0;
+  const currentCardIndex = typeof handlers.currentCardIndex === 'number' ? handlers.currentCardIndex : 0;
 
-  const safeSectionIndex =
-    currentSectionId >= 0 && currentSectionId < sections.length ? currentSectionId : 0;
-
+  const safeSectionIndex = currentSectionId >= 0 && currentSectionId < sections.length ? currentSectionId : 0;
   const currentSection = sections[safeSectionIndex] || sections[0];
 
-  // garante comparação numérica, mesmo que sectionIndex venha como string do Firestore
   const sectionCards = cards.filter(c => Number(c.sectionIndex) === safeSectionIndex);
-
-  const safeCardIndex =
-    currentCardIndex >= 0 && currentCardIndex < sectionCards.length ? currentCardIndex : 0;
-
+  const safeCardIndex = currentCardIndex >= 0 && currentCardIndex < sectionCards.length ? currentCardIndex : 0;
   const activeCard = sectionCards[safeCardIndex] || sectionCards[0] || null;
   const hasCards = sectionCards.length > 0;
+
+  // Build HTML with escaped values to prevent XSS
+  const safeCat = escapeHtml(sections[safeSectionIndex]?.cat || sections[0].cat || '');
+  const safeQuestion = activeCard ? escapeHtml(activeCard.question || '') : '';
+  const safeAnswer = activeCard ? escapeHtml(activeCard.answer || '') : '';
+  const safeSectionName = escapeHtml(currentSection.cat || '');
 
   cont.innerHTML = `
     <div class="fc-layout">
@@ -53,7 +46,7 @@ export function renderFlashcardsView(sections, cards, handlers) {
         </div>
 
         <div class="fc-field">
-          <label>Matéria</label>
+          <label for="fc-select-trigger">Matéria</label>
           <div class="fc-custom-select" id="fc-custom-select">
             <div
               class="fc-select-trigger"
@@ -62,24 +55,25 @@ export function renderFlashcardsView(sections, cards, handlers) {
               tabindex="0"
               aria-haspopup="listbox"
               aria-expanded="false"
+              aria-label="Selecionar matéria"
             >
-              <span class="fc-select-value" id="fc-select-value">
-                ${sections[safeSectionIndex]?.cat || sections[0].cat}
-              </span>
+              <span class="fc-select-value" id="fc-select-value">${safeCat}</span>
               <svg class="fc-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
             </div>
-            <ul class="fc-select-dropdown" id="fc-select-dropdown" role="listbox">
+            <ul class="fc-select-dropdown" id="fc-select-dropdown" role="listbox" aria-label="Matérias">
               ${sections.map((sec, index) => `
                 <li
                   class="fc-select-option${index === safeSectionIndex ? ' active' : ''}"
                   role="option"
                   aria-selected="${index === safeSectionIndex}"
                   data-value="${index}"
+                  tabindex="-1"
                 >
-                  ${sec.cat}
+                  ${escapeHtml(sec.cat || '')}
                 </li>
               `).join('')}
             </ul>
@@ -98,14 +92,14 @@ export function renderFlashcardsView(sections, cards, handlers) {
           <button type="button" class="btn-primary fc-save-btn" id="fc-save-btn">
             Salvar flashcard
           </button>
-        ` : ``}
+        ` : ''}
       </div>
 
       <div class="fc-right">
         <div class="fc-review">
           <div class="fc-review-header">
             <div>
-              <span class="fc-section-name">${currentSection.cat}</span>
+              <span class="fc-section-name">${safeSectionName}</span>
               <p class="fc-subtitle">
                 ${hasCards ? `Card ${safeCardIndex + 1} de ${sectionCards.length}` : 'Nenhum flashcard disponível'}
               </p>
@@ -115,14 +109,14 @@ export function renderFlashcardsView(sections, cards, handlers) {
 
           ${hasCards ? `
             <div class="fc-card-wrapper">
-              <div class="fc-card" id="fc-card">
+              <div class="fc-card" id="fc-card" role="region" aria-label="Flashcard" aria-live="polite">
                 <div class="fc-face fc-face-front" id="fc-face-front">
                   <span class="fc-label">Pergunta</span>
-                  <p>${activeCard.question}</p>
+                  <p>${safeQuestion}</p>
                 </div>
                 <div class="fc-face fc-face-back" id="fc-face-back">
                   <span class="fc-label">Resposta</span>
-                  <p>${activeCard.answer}</p>
+                  <p>${safeAnswer}</p>
                 </div>
               </div>
             </div>
@@ -144,12 +138,15 @@ export function renderFlashcardsView(sections, cards, handlers) {
               ` : ''}
             </div>
 
-            <div class="fc-card-thumbs">
-              ${sectionCards.map((card, index) => `
+            <div class="fc-card-thumbs" role="tablist" aria-label="Navegação de cards">
+              ${sectionCards.map((_, index) => `
                 <button
                   type="button"
                   class="fc-chip${index === safeCardIndex ? ' active' : ''}"
                   data-card-index="${index}"
+                  role="tab"
+                  aria-selected="${index === safeCardIndex}"
+                  aria-label="Card ${index + 1} de ${sectionCards.length}"
                 >
                   #${index + 1}
                 </button>
@@ -157,7 +154,7 @@ export function renderFlashcardsView(sections, cards, handlers) {
             </div>
           ` : `
             <div class="fc-empty-cards">
-              <p>Nenhum flashcard criado para <strong>${currentSection.cat}</strong> ainda.</p>
+              <p>Nenhum flashcard criado para <strong>${safeSectionName}</strong> ainda.</p>
               ${isAdmin
                 ? '<p>Use a área à esquerda para adicionar o primeiro flashcard.</p>'
                 : '<p>Aguarde um administrador criar os primeiros flashcards.</p>'}
@@ -169,11 +166,11 @@ export function renderFlashcardsView(sections, cards, handlers) {
   `;
 
   // ── Custom Select ──────────────────────────────────────────────────────────
-  const customSelect   = document.getElementById('fc-custom-select');
-  const selectTrigger  = document.getElementById('fc-select-trigger');
-  const selectValue    = document.getElementById('fc-select-value');
-  const selectDropdown = document.getElementById('fc-select-dropdown');
-  const selectOptions  = selectDropdown ? selectDropdown.querySelectorAll('.fc-select-option') : [];
+  const customSelect   = qs('fc-custom-select');
+  const selectTrigger  = qs('fc-select-trigger');
+  const selectValue    = qs('fc-select-value');
+  const selectDropdown = qs('fc-select-dropdown');
+  const selectOptions  = selectDropdown ? [...selectDropdown.querySelectorAll('.fc-select-option')] : [];
 
   function openSelect() {
     if (!customSelect || !selectTrigger) return;
@@ -196,15 +193,14 @@ export function renderFlashcardsView(sections, cards, handlers) {
     selectTrigger.addEventListener('click', toggleSelect);
     selectTrigger.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSelect(); }
-      if (e.key === 'Escape') closeSelect();
+      if (e.key === 'Escape') { e.preventDefault(); closeSelect(); selectTrigger.focus(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); openSelect(); selectOptions[0]?.focus(); }
     });
   }
 
   selectOptions.forEach(opt => {
     opt.addEventListener('click', () => {
       const newIndex = Number(opt.dataset.value);
-
-      // atualiza visual do select
       selectOptions.forEach(o => {
         o.classList.remove('active');
         o.setAttribute('aria-selected', 'false');
@@ -212,29 +208,23 @@ export function renderFlashcardsView(sections, cards, handlers) {
       opt.classList.add('active');
       opt.setAttribute('aria-selected', 'true');
       if (selectValue) selectValue.textContent = opt.textContent.trim();
-
       closeSelect();
-
-      if (handlers.onChangeSection) {
-        handlers.onChangeSection(newIndex);
-      }
+      if (handlers.onChangeSection) handlers.onChangeSection(newIndex);
     });
   });
 
-  // Fecha ao clicar fora
-  document.addEventListener('click', function handleOutside(e) {
-    if (customSelect && !customSelect.contains(e.target)) {
-      closeSelect();
-    }
-  });
+  // Close on outside click
+  const outsideClickHandler = (e) => {
+    if (customSelect && !customSelect.contains(e.target)) closeSelect();
+  };
+  document.addEventListener('click', outsideClickHandler);
 
-  // ── Demais eventos ─────────────────────────────────────────────────────────
+  // ── Other events ─────────────────────────────────────────────────────────
   const saveBtn       = qs('fc-save-btn');
   const toggleFaceBtn = qs('fc-toggle-face-btn');
   const nextBtn       = qs('fc-next-btn');
   const editBtn       = qs('fc-edit-btn');
   const deleteBtn     = qs('fc-delete-btn');
-  const chipButtons   = document.querySelectorAll('.fc-chip');
   const questionInput = qs('fc-question');
   const answerInput   = qs('fc-answer');
 
@@ -291,20 +281,14 @@ export function renderFlashcardsView(sections, cards, handlers) {
   if (nextBtn && hasCards) {
     nextBtn.addEventListener('click', () => {
       const nextIndex = hasCards ? (safeCardIndex + 1) % sectionCards.length : 0;
-      if (handlers.onChangeCard) {
-        handlers.onChangeCard(nextIndex);
-      }
+      if (handlers.onChangeCard) handlers.onChangeCard(nextIndex);
     });
   }
 
-  if (chipButtons.length) {
-    chipButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.cardIndex);
-        if (handlers.onChangeCard) {
-          handlers.onChangeCard(idx);
-        }
-      });
+  document.querySelectorAll('.fc-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.cardIndex);
+      if (handlers.onChangeCard) handlers.onChangeCard(idx);
     });
-  }
+  });
 }
