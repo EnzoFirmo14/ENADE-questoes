@@ -7,7 +7,7 @@ import {
   getDocs
 } from '../core/firebase.js';
 import { requireAuth } from '../core/auth-common.js';
-import { qs, toast, loader } from '../core/ui.js';
+import { qs, toast } from '../core/ui.js';
 import { renderFlashcardsView } from '../views/flashcards.js';
 
 let userCtx = null;
@@ -19,14 +19,17 @@ let currentCardIndex = 0;
 // ===================== AUTH / MENU ======================
 
 function bindCommonEvents() {
-  qs('logout-btn')?.addEventListener('click', async () => {
-    try {
-      await signOut(auth);
-    } catch (e) {
-      console.error('[flashcards] logout error', e);
-    }
-    window.location.href = './index.html';
-  });
+  const logoutBtn = qs('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+      } catch (e) {
+        console.error('[flashcards] logout error', e);
+      }
+      window.location.href = './index.html';
+    });
+  }
 }
 
 // ===================== CURRÍCULO =========================
@@ -35,13 +38,17 @@ async function loadCurriculum() {
   try {
     const snap = await getDocs(collection(db, 'curriculum'));
     curriculum = [];
+
     snap.forEach(d => {
       if (d.id === 'main') {
         curriculum = d.data().sections || [];
       }
     });
+
     curriculum.forEach(sec => {
-      if (!Array.isArray(sec.courses)) sec.courses = [];
+      if (!Array.isArray(sec.courses)) {
+        sec.courses = [];
+      }
     });
   } catch (e) {
     console.error('[flashcards] carregar currículo', e);
@@ -55,14 +62,16 @@ async function loadFlashcards() {
   try {
     const snap = await getDocs(collection(db, 'flashcards'));
     flashcards = [];
-    snap.forEach(d => flashcards.push({ id: d.id, ...d.data() }));
+    snap.forEach(d => {
+      flashcards.push({ id: d.id, ...d.data() });
+    });
   } catch (e) {
     console.error('[flashcards] carregar flashcards', e);
     toast('Erro ao carregar flashcards.', false);
   }
 }
 
-// ===================== VIEW ==============================
+// ===================== VIEW (modo leitura) =================
 
 function mountFlashcardsView(sectionIndex = 0, cardIndex = 0) {
   currentSectionIndex = sectionIndex;
@@ -72,8 +81,8 @@ function mountFlashcardsView(sectionIndex = 0, cardIndex = 0) {
     currentSectionId: sectionIndex,
     currentCardIndex: cardIndex,
     isAdmin: false,
-    onChangeSection: (idx) => mountFlashcardsView(idx, 0),
-    onChangeCard: (idx) => mountFlashcardsView(sectionIndex, idx),
+    onChangeSection: idx => mountFlashcardsView(idx, 0),
+    onChangeCard: idx => mountFlashcardsView(sectionIndex, idx),
     onCreateCard: null,
     onEditCard: null,
     onDeleteCard: null
@@ -86,11 +95,12 @@ async function init() {
   bindCommonEvents();
 
   try {
-    // requireAuth already calls loader(true) internally
+    // requireAuth já chama loader(true) internamente
     userCtx = await requireAuth();
 
-    if (qs('nav-user-email')) {
-      qs('nav-user-email').textContent =
+    const navUserEmail = qs('nav-user-email');
+    if (navUserEmail) {
+      navUserEmail.textContent =
         userCtx.user.displayName || userCtx.user.email;
     }
 

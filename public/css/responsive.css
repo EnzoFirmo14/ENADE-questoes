@@ -3,6 +3,7 @@
    Mobile-first approach
    ============================================ */
 
+
 /* ── Small phones (320px+) ── */
 @media (max-width: 479px) {
   :root {
@@ -107,7 +108,13 @@
     color: var(--text-muted);
     text-transform: uppercase;
   }
+
+  /* selects customizados em telas bem pequenas */
+  .fc-custom-select .select-dropdown {
+    max-height: 200px;
+  }
 }
+
 
 /* ── Large phones (480px+) ── */
 @media (min-width: 480px) and (max-width: 767px) {
@@ -142,6 +149,7 @@
   }
 }
 
+
 /* ── Tablets (768px+) ── */
 @media (min-width: 768px) and (max-width: 1023px) {
   .stats-grid {
@@ -157,6 +165,7 @@
   }
 }
 
+
 /* ── Desktop (1024px+) ── */
 @media (min-width: 1024px) {
   .sidebar {
@@ -164,12 +173,14 @@
   }
 }
 
+
 /* ── Large Desktop (1280px+) ── */
 @media (min-width: 1280px) {
   .container {
     max-width: var(--max-width);
   }
 }
+
 
 /* ── Mobile Sidebar Overlay ── */
 @media (max-width: 1023px) {
@@ -214,6 +225,7 @@
   }
 }
 
+
 /* ── Touch-friendly targets ── */
 @media (pointer: coarse) {
   .btn,
@@ -232,6 +244,7 @@
   }
 }
 
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -246,6 +259,7 @@
     scroll-behavior: auto;
   }
 }
+
 
 /* ── Print ── */
 @media print {

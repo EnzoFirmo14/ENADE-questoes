@@ -111,10 +111,14 @@ export function renderFlashcardsView(sections, cards, handlers) {
             <div class="fc-card-wrapper">
               <div class="fc-card" id="fc-card" role="region" aria-label="Flashcard" aria-live="polite">
                 <div class="fc-face fc-face-front" id="fc-face-front">
+                  <p class="fc-text">${safeQuestion}</p>
                   <span class="fc-label">Pergunta</span>
-                  <p>${safeQuestion}</p>
                 </div>
+
                 <div class="fc-face fc-face-back" id="fc-face-back">
+                  <p class="fc-text">${safeAnswer}</p>
+                  <span class="fc-label">Resposta</span>
+                </div>ss="fc-face fc-face-back" id="fc-face-back">
                   <span class="fc-label">Resposta</span>
                   <p>${safeAnswer}</p>
                 </div>

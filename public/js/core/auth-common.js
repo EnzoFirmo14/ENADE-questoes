@@ -1,4 +1,4 @@
-// js/auth-common.js
+// js/core/auth-common.js
 import { auth, db, onAuthStateChanged, doc, getDoc, setDoc } from './firebase.js';
 import { toast, loader } from './ui.js';
 

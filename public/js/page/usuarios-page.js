@@ -1,4 +1,4 @@
-// js/usuarios-page.js
+// js/page/usuarios-page.js
 import {
   auth,
   db,

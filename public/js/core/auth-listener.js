@@ -1,4 +1,4 @@
-// js/auth-listener.js
+// js/core/auth-listener.js
 import { auth, onAuthStateChanged } from './firebase.js';
 import { loader, clearErr } from './ui.js';
 

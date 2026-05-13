@@ -1,4 +1,4 @@
-// js/ui.js — UI utilities
+// js/core/ui.js — UI utilities
 
 export const qs = (id) => document.getElementById(id);
 export const qsa = (sel, parent = document) => [...parent.querySelectorAll(sel)];

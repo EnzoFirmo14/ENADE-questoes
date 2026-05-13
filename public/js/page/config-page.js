@@ -1,4 +1,4 @@
-// js/config-page.js
+// js/page/config-page.js
 import {
   db,
   doc,
@@ -20,9 +20,9 @@ import {
 } from '../views/admin.js';
 import { renderFlashcardsView } from '../views/flashcards.js';
 
-let userCtx            = null;
-let adminSections      = [];
-let flashcards         = [];
+let userCtx             = null;
+let adminSections       = [];
+let flashcards          = [];
 let draggedSectionIndex = null;
 
 // Estado atual da view de flashcards (para re-render após CRUD)
@@ -30,8 +30,8 @@ let fcSectionIndex = 0;
 let fcCardIndex    = 0;
 
 // Preserva estado aberto entre re-renders
-let openSectionBodies = new Set();
-let openCourseBoxes   = new Set();
+const openSectionBodies = new Set();
+const openCourseBoxes   = new Set();
 
 // ============================================
 // PRESERVAÇÃO DE ESTADO
@@ -145,8 +145,8 @@ function addCategory() {
   }
 
   adminSections.push({
-    cat:   name,
-    color: nextCategoryColor(adminSections.length),
+    cat:    name,
+    color:  nextCategoryColor(adminSections.length),
     prio,
     items: [],
     courses: []
@@ -264,22 +264,24 @@ async function loadFlashcards() {
 
 /**
  * Monta (ou re-monta) o painel de flashcards dentro de #flashcards-container.
+ * Aqui não mexemos diretamente em DOM do select; isso é responsabilidade de
+ * renderFlashcardsView (que já usa o fc-custom-select).
  */
 function mountFlashcardsAdmin(sectionIndex = fcSectionIndex, cardIndex = fcCardIndex) {
   fcSectionIndex = sectionIndex;
   fcCardIndex    = cardIndex;
 
   renderFlashcardsView(adminSections, flashcards, {
-    currentSectionId:  sectionIndex,
-    currentCardIndex:  cardIndex,
+    currentSectionId: sectionIndex,
+    currentCardIndex: cardIndex,
     isAdmin: true,
 
-    onChangeSection: (idx) => mountFlashcardsAdmin(idx, 0),
-    onChangeCard:    (idx) => mountFlashcardsAdmin(sectionIndex, idx),
+    onChangeSection: idx => mountFlashcardsAdmin(idx, 0),
+    onChangeCard:    idx => mountFlashcardsAdmin(sectionIndex, idx),
 
-    onCreateCard: async (idx, question, answer) => {
+    onCreateCard: async (sectionId, question, answer) => {
       await addDoc(collection(db, 'flashcards'), {
-        sectionIndex: idx,
+        sectionIndex: sectionId,
         question,
         answer,
         createdAt: Date.now(),
@@ -287,21 +289,21 @@ function mountFlashcardsAdmin(sectionIndex = fcSectionIndex, cardIndex = fcCardI
       });
       toast('Flashcard criado.', true);
       await loadFlashcards();
-      mountFlashcardsAdmin(idx, 0);
+      mountFlashcardsAdmin(sectionId, 0);
     },
 
     onEditCard: async (id, question, answer) => {
       await updateDoc(doc(db, 'flashcards', id), { question, answer });
       toast('Flashcard atualizado.', true);
       await loadFlashcards();
-      mountFlashcardsAdmin(sectionIndex, cardIndex);
+      mountFlashcardsAdmin(fcSectionIndex, fcCardIndex);
     },
 
     onDeleteCard: async (id) => {
       await deleteDoc(doc(db, 'flashcards', id));
       toast('Flashcard removido.', true);
       await loadFlashcards();
-      mountFlashcardsAdmin(sectionIndex, 0);
+      mountFlashcardsAdmin(fcSectionIndex, 0);
     }
   });
 }

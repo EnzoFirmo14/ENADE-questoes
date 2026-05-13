@@ -1,4 +1,4 @@
-// public/js/categories.js
+// /js/core/categories.js
 
 import {
   db,

@@ -10,7 +10,13 @@
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
-    <a href="#view-flashcards" class="sr-only" style="position:absolute;top:0;left:0;z-index:9999;padding:1rem;background:var(--primary);color:#fff;">Pular para o conteúdo</a>
+    <a
+      href="#view-flashcards"
+      class="sr-only"
+      style="position:absolute;top:0;left:0;z-index:9999;padding:1rem;background:var(--primary);color:#fff;"
+    >
+      Pular para o conteúdo
+    </a>
 
     <div id="loader" role="status" aria-live="polite">
       <div class="spinner spinner-lg" aria-label="Carregando"></div>
@@ -50,7 +56,13 @@
 
             <div class="field">
               <label for="account-email">Email</label>
-              <input id="account-email" type="email" readonly placeholder="email@exemplo.com" aria-readonly="true" />
+              <input
+                id="account-email"
+                type="email"
+                readonly
+                placeholder="email@exemplo.com"
+                aria-readonly="true"
+              />
             </div>
 
             <div class="field">
@@ -70,12 +82,22 @@
 
             <div class="field">
               <label for="account-pass-input">Nova senha</label>
-              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
+              <input
+                id="account-pass-input"
+                type="password"
+                placeholder="Digite a nova senha"
+                autocomplete="new-password"
+              />
             </div>
 
             <div class="field">
               <label for="account-pass-confirm-input">Confirmar nova senha</label>
-              <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
+              <input
+                id="account-pass-confirm-input"
+                type="password"
+                placeholder="Digite a senha novamente"
+                autocomplete="new-password"
+              />
             </div>
 
             <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
@@ -96,6 +118,7 @@
 
     <main class="view active" id="view-flashcards" role="main">
       <div class="wrap">
+        <!-- O JS monta o conteúdo aqui usando fc-layout / fc-left / fc-right -->
         <div id="flashcards-container" aria-label="Flashcards"></div>
       </div>
     </main>

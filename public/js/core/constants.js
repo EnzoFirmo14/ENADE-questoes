@@ -1,4 +1,4 @@
-// js/constants.js
+// js/core/constants.js
 
 const __ENV = (typeof window !== 'undefined' && window.__ENV__) ? window.__ENV__ : {};
 

@@ -5,13 +5,16 @@
    full design token integration.
    ============================================ */
 
+
 /* ── Select Container ── */
 .fc-custom-select {
   position: relative;
   width: 100%;
   font-family: var(--font-sans, 'Inter', sans-serif);
   user-select: none;
+  max-width: 100%;
 }
+
 
 /* ── Trigger Button (visible closed state) ── */
 .fc-custom-select .select-trigger {
@@ -20,7 +23,7 @@
   justify-content: space-between;
   gap: var(--space-2);
   width: 100%;
-  min-height: 42px;
+  min-height: 44px;
   padding: var(--space-2) var(--space-4);
   font-family: inherit;
   font-size: var(--text-sm);
@@ -39,8 +42,9 @@
 }
 
 .fc-custom-select .select-trigger:hover {
-  border-color: rgba(124, 110, 245, 0.4);
-  background: rgba(124, 110, 245, 0.03);
+  border-color: rgba(124, 110, 245, 0.45);
+  background: rgba(124, 110, 245, 0.06);
+  box-shadow: var(--shadow-sm);
 }
 
 .fc-custom-select .select-trigger:active {
@@ -50,16 +54,16 @@
 /* Focus-visible for keyboard users */
 .fc-custom-select .select-trigger:focus-visible {
   border-color: var(--accent);
-  background: rgba(124, 110, 245, 0.06);
-  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.15);
+  background: rgba(124, 110, 245, 0.08);
+  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.18);
 }
 
 /* Open state */
 .fc-custom-select.open .select-trigger,
 .fc-custom-select .select-trigger[aria-expanded="true"] {
   border-color: var(--accent);
-  background: rgba(124, 110, 245, 0.06);
-  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.15);
+  background: rgba(124, 110, 245, 0.08);
+  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.18);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -99,6 +103,7 @@
   color: var(--accent);
 }
 
+
 /* ── Dropdown Panel ── */
 .fc-custom-select .select-dropdown {
   position: absolute;
@@ -106,7 +111,7 @@
   left: 0;
   right: 0;
   min-width: 100%;
-  max-height: 260px;
+  max-height: 220px; /* levemente menor para não cobrir toda a tela */
   overflow-y: auto;
   overflow-x: hidden;
   margin-top: 2px;
@@ -151,6 +156,7 @@
   transform: translateY(0) scaleY(1);
 }
 
+
 /* ── Dropdown Search Input ── */
 .fc-custom-select .select-search {
   width: 100%;
@@ -180,6 +186,7 @@
   box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.12);
 }
 
+
 /* ── Options List ── */
 .fc-custom-select .select-options {
   list-style: none;
@@ -201,10 +208,11 @@
   transition: background var(--transition-fast),
               color var(--transition-fast),
               transform var(--transition-fast);
+  max-width: 100%;
 }
 
 .fc-custom-select .select-option:hover {
-  background: rgba(124, 110, 245, 0.1);
+  background: rgba(124, 110, 245, 0.12);
   color: var(--accent);
   transform: translateX(2px);
 }
@@ -215,14 +223,14 @@
 
 /* Keyboard focus */
 .fc-custom-select .select-option:focus-visible {
-  background: rgba(124, 110, 245, 0.1);
+  background: rgba(124, 110, 245, 0.12);
   color: var(--accent);
   box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 /* Selected option */
 .fc-custom-select .select-option.selected {
-  background: rgba(124, 110, 245, 0.15);
+  background: rgba(124, 110, 245, 0.16);
   color: var(--accent);
   font-weight: var(--font-semibold);
 }
@@ -259,6 +267,7 @@
   cursor: default;
 }
 
+
 /* ── No Results Message ── */
 .fc-custom-select .select-no-results {
   padding: var(--space-4);
@@ -266,6 +275,7 @@
   color: var(--muted);
   text-align: center;
 }
+
 
 /* ── Scrollbar Styling ── */
 .fc-custom-select .select-dropdown::-webkit-scrollbar {
@@ -292,6 +302,7 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border2) transparent;
 }
+
 
 /* ── Multiple Selection Mode ── */
 .fc-custom-select.multiple .select-option {
@@ -324,6 +335,7 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
 
 /* ── Tag / Chip Display for Multiple ── */
 .fc-custom-select .selected-tags {
@@ -381,6 +393,7 @@
   background: rgba(239, 68, 68, 0.1);
 }
 
+
 /* ── Size Variants ── */
 .fc-custom-select.sm .select-trigger {
   min-height: 34px;
@@ -403,6 +416,7 @@
 .fc-custom-select.lg .select-dropdown {
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
+
 
 /* ── Error State ── */
 .fc-custom-select.error .select-trigger {
@@ -427,6 +441,7 @@
   line-height: var(--leading-normal);
 }
 
+
 /* ── Disabled State ── */
 .fc-custom-select.disabled,
 .fc-custom-select[data-disabled="true"] {
@@ -438,6 +453,7 @@
 .fc-custom-select[data-disabled="true"] .select-trigger {
   cursor: not-allowed;
 }
+
 
 /* ── Loading State ── */
 .fc-custom-select.loading .select-trigger {
@@ -452,6 +468,7 @@
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
 
 /* ── Reduced Motion ── */
 @media (prefers-reduced-motion: reduce) {

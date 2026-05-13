@@ -1,4 +1,4 @@
-// js/login-page.js
+// js/page/login-page.js
 import {
   auth,
   db,
