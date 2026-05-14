@@ -6,7 +6,7 @@
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
-  height: var(--navbar-height);
+  min-height: var(--navbar-height);
   background: rgba(15, 23, 42, 0.96);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -172,7 +172,8 @@ button.nav-btn:last-child:hover {
   z-index: var(--z-dropdown);
   padding: var(--space-5);
   max-height: calc(100vh - 100px);
-  overflow: visible; /* Permitir que o dropdown do select escape do container */
+  overflow-y: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -384,15 +385,29 @@ button.nav-btn:last-child:hover {
   .topnav {
     padding-inline: var(--space-4);
     gap: var(--space-2);
+    flex-wrap: wrap;
+    padding-block: var(--space-2);
   }
 
   .nav-brand {
     font-size: var(--text-lg);
+    flex: 1; /* Pushes account menu to the right */
   }
 
   .nav-logo {
     width: 28px;
     height: 28px;
+  }
+
+  .account-menu {
+    margin-right: 0;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-top: var(--space-1);
   }
 
   .nav-btn {
@@ -412,10 +427,6 @@ button.nav-btn:last-child:hover {
 
 @media (max-width: 480px) {
   .account-name {
-    display: none;
-  }
-
-  .nav-btn span:not(:last-child) {
     display: none;
   }
 }
