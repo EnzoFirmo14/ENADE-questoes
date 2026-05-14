@@ -3,7 +3,6 @@
 // ============================================
 // IMPORTAÇÕES
 // ============================================
-import { ADMIN_EMAILS } from './core/constants.js';
 import {
   auth, db, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, addDoc,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
@@ -11,7 +10,8 @@ import {
 } from './core/firebase.js';
 import {
   qs, showErr, clearErr, toast, loader,
-  showScreen, switchTab, showView, setAdminUI
+  showScreen, switchTab, showView, setAdminUI,
+  customConfirm, customPrompt
 } from './core/ui.js';
 import { renderChecklist, syncChecklistItem, totalItems } from './views/checklist.js';
 import { renderAdmin, renderAdminItems, toggleAdminSec, nextCategoryColor } from './views/admin.js';
@@ -124,7 +124,7 @@ async function doAuth() {
       await setDoc(doc(db, 'users', cred.user.uid), {
         email,
         name: name || email.split('@')[0],
-        isAdmin: ADMIN_EMAILS.includes(email),
+        isAdmin: false,
         course,
         progress: {}
       });
@@ -207,7 +207,8 @@ function bindAccountMenuEvents() {
 
   trigger.addEventListener('click', e => {
     e.stopPropagation();
-    dropdown.classList.toggle('open');
+    const menu = trigger.closest('.account-menu');
+    if (menu) menu.classList.toggle('open');
 
     const err = qs('account-err');
     if (err) {
@@ -225,7 +226,8 @@ function bindAccountMenuEvents() {
     const clickedTrigger = trigger.contains(e.target);
 
     if (!clickedInsideMenu && !clickedTrigger) {
-      dropdown.classList.remove('open');
+      const menu = trigger.closest('.account-menu');
+      if (menu) menu.classList.remove('open');
     }
   });
 
@@ -307,9 +309,8 @@ async function saveAccountData() {
       qs('account-pass-confirm-input').value = '';
     }
 
-    if (qs('account-dropdown')) {
-      qs('account-dropdown').classList.remove('open');
-    }
+    const accountMenu = document.querySelector('.account-menu');
+    if (accountMenu) accountMenu.classList.remove('open');
 
     initChecklistCourseFilter({
       ...userDoc,
@@ -382,7 +383,7 @@ async function saveCurriculum() {
 }
 
 async function resetProgress() {
-  if (!confirm('Reiniciar todo o progresso?')) return;
+  if (!(await customConfirm('Reiniciar Progresso', 'Reiniciar todo o progresso?'))) return;
   progress = {};
   await saveProgress();
   renderChecklistView();
@@ -634,9 +635,9 @@ function toggleSectionCourse(si, courseId, checked) {
   renderAdminView();
 }
 
-function removeSection(e, si) {
+async function removeSection(e, si) {
   e.stopPropagation();
-  if (!confirm(`Remover categoria "${adminSections[si].cat}"?`)) return;
+  if (!(await customConfirm('Remover Categoria', `Remover categoria "${adminSections[si].cat}"?`))) return;
   adminSections.splice(si, 1);
   renderAdminView();
 }
@@ -662,8 +663,8 @@ function addItem(si) {
   }, 0);
 }
 
-function editItem(si, ii) {
-  const txt = prompt('Editar:', adminSections[si].items[ii]);
+async function editItem(si, ii) {
+  const txt = await customPrompt('Editar Assunto', 'Assunto:', adminSections[si].items[ii]);
   if (txt === null || !txt.trim()) return;
 
   adminSections[si].items[ii] = txt.trim();

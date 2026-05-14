@@ -68,6 +68,48 @@
   outline-offset: 2px;
 }
 
+/* ── Section Dividers (Checklist vs Flashcards) ── */
+.admin-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  max-width: 960px;
+  margin-inline: auto;
+}
+
+.admin-section-icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  flex-shrink: 0;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.05);
+}
+
+.admin-section-header h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.admin-section-header p {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: var(--space-0_5) 0 0 0;
+}
+
 /* ── Add category box ── */
 .add-cat-box {
   background: #020617;
@@ -214,13 +256,18 @@
   border: 1.5px solid #1f2937;
   border-radius: var(--radius-xl);
   margin-bottom: var(--space-4);
-  overflow: hidden;
+  overflow: visible; /* Permitir que dropdowns apareçam fora do card */
   transition: all var(--transition-normal);
   cursor: grab;
   cursor: -webkit-grab;
   position: relative;
   max-width: 960px;
   margin-inline: auto;
+}
+
+/* Garante que o card com o select aberto fique por cima dos outros */
+.admin-sec:has(.fc-custom-select.open) {
+  z-index: var(--z-dropdown, 100);
 }
 
 .admin-sec:hover {
@@ -247,6 +294,8 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-5);
   border-bottom: 1px solid #111827;
+  border-top-left-radius: inherit; /* Mantém o raio do pai */
+  border-top-right-radius: inherit;
   cursor: pointer;
   transition: background var(--transition-fast);
   user-select: none;
@@ -265,6 +314,10 @@
   flex: 1;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 100px; /* Garante que o título não suma se o select for largo */
 }
 
 /* ── Section body ── */
@@ -316,6 +369,14 @@
 }
 
 /* ── Icon buttons (edit / delete) ── */
+.cat-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
 .icon-btn {
   width: 32px;
   height: 32px;
@@ -414,7 +475,15 @@
 
 .prio-select {
   min-width: 150px;
+  width: 160px; /* Largura fixa para não achatar o cabeçalho */
   margin-left: auto;
+}
+
+/* Quando o select é melhorado, o wrapper .fc-custom-select herda o posicionamento */
+.admin-sec-head .fc-custom-select {
+  width: 160px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 /* ── Courses Toggle ── */
@@ -797,4 +866,71 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+/* ── Users Edit Modal ── */
+.admin-toggle-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.admin-toggle-card .pill-check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0;
+  cursor: pointer;
+}
+
+.admin-toggle-card .pill-check input {
+  margin-top: 4px;
+}
+
+.admin-toggle-card .pill-check-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-toggle-card .pill-check-content strong {
+  font-size: var(--text-xs);
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+.admin-toggle-card .pill-check-content span {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+.btn-danger-outline {
+  background: transparent;
+  border: 1.5px solid var(--danger);
+  color: var(--danger);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.btn-danger-outline:hover {
+  background: var(--danger-bg);
+  border-color: var(--danger-light);
+  color: var(--white);
+}
+
+.modal-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: 2px;
 }

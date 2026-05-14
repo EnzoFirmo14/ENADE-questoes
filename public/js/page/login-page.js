@@ -8,8 +8,9 @@ import {
   setDoc,
   doc
 } from '../core/firebase.js';
-import { ADMIN_EMAILS, FIREBASE_ERRORS } from '../core/constants.js';
+import { FIREBASE_ERRORS } from '../core/constants.js';
 import { qs, showErr, clearErr, toast, loader } from '../core/ui.js';
+import { enhanceNativeSelect } from '../components/customSelect.js';
 
 let isRegisterMode = false;
 
@@ -78,6 +79,11 @@ function updateAuthModeUI() {
   if (nameInput) nameInput.setAttribute('aria-required', isRegisterMode ? 'true' : 'false');
   if (courseInput) courseInput.setAttribute('aria-required', isRegisterMode ? 'true' : 'false');
   if (confirmInput) confirmInput.setAttribute('aria-required', isRegisterMode ? 'true' : 'false');
+
+  // Melhorar select de curso no modo registro
+  if (isRegisterMode && courseInput) {
+    enhanceNativeSelect(courseInput);
+  }
 }
 
 async function doAuth() {
@@ -117,7 +123,7 @@ async function doAuth() {
       await setDoc(doc(db, 'users', cred.user.uid), {
         email,
         name: name || email.split('@')[0],
-        isAdmin: ADMIN_EMAILS.includes(email),
+        isAdmin: false,
         course,
         progress: {},
         disabled: false,
@@ -146,6 +152,12 @@ async function doAuth() {
 // Init
 bindAuthUI();
 updateAuthModeUI();
+
+// Forçar a melhoria do select de curso
+const courseInput = qs('inp-course');
+if (courseInput) {
+  enhanceNativeSelect(courseInput);
+}
 
 // Hide loader after a short delay to prevent flash
 setTimeout(() => loader(false), 300);

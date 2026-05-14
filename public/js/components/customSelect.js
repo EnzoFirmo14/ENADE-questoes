@@ -147,3 +147,88 @@ export function initCustomSelect(rootEl, { value, onChange }) {
     }
   }
 }
+
+/**
+ * Converte um <select> nativo em um Custom Select dinamicamente.
+ */
+export function enhanceNativeSelect(selectEl, onChange) {
+  if (!selectEl || selectEl.getAttribute('data-enhanced') === 'true') return;
+
+  const options = [...selectEl.options];
+  const currentValue = selectEl.value;
+  const currentText = selectEl.options[selectEl.selectedIndex]?.text || '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'fc-custom-select';
+  if (selectEl.className.includes('sm')) wrapper.classList.add('sm');
+  if (selectEl.className.includes('lg')) wrapper.classList.add('lg');
+
+  wrapper.innerHTML = `
+    <div class="select-trigger" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+      <span class="selected-text">${currentText}</span>
+      <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+    <ul class="select-dropdown" role="listbox">
+      ${options.map(opt => `
+        <li class="select-option${opt.value === currentValue ? ' selected' : ''}" 
+            role="option" 
+            data-value="${opt.value}" 
+            tabindex="-1">
+          ${opt.text}
+        </li>
+      `).join('')}
+    </ul>
+  `;
+
+  // Esconder o select original mas manter no DOM para submissão de forms se necessário
+  selectEl.style.display = 'none';
+  selectEl.setAttribute('data-enhanced', 'true');
+  selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+  const trigger = wrapper.querySelector('.select-trigger');
+  const selectedText = wrapper.querySelector('.selected-text');
+  const dropdown = wrapper.querySelector('.select-dropdown');
+  const customOptions = [...wrapper.querySelectorAll('.select-option')];
+
+  function open() {
+    wrapper.classList.add('open');
+    trigger.setAttribute('aria-expanded', 'true');
+  }
+
+  function close() {
+    wrapper.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    wrapper.classList.contains('open') ? close() : open();
+  });
+
+  // Prevenir que mousedown propague para o cabeçalho (evita expand/collapse indesejado)
+  trigger.addEventListener('mousedown', (e) => e.stopPropagation());
+
+  customOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      const val = opt.dataset.value;
+      selectEl.value = val;
+      selectedText.textContent = opt.textContent.trim();
+      
+      customOptions.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      
+      close();
+      
+      // Disparar evento de mudança no select original
+      selectEl.dispatchEvent(new Event('change'));
+      if (onChange) onChange(val);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) close();
+  });
+}

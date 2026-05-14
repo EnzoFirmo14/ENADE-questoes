@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="ENADE Revisão - Flashcards interativos para estudo" />
+    <meta name="description" content="ENADE Review - Flashcards interativos para estudo" />
     <meta name="theme-color" content="#4f46e5" />
-    <title>ENADE Revisão - Flashcards</title>
+    <title>ENADE Review - Flashcards</title>
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
@@ -82,22 +82,18 @@
 
             <div class="field">
               <label for="account-pass-input">Nova senha</label>
-              <input
-                id="account-pass-input"
-                type="password"
-                placeholder="Digite a nova senha"
-                autocomplete="new-password"
-              />
+              <div class="account-password-field">
+                <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
+                <button type="button" class="account-pass-toggle" data-target="account-pass-input" aria-label="Mostrar senha">Mostrar</button>
+              </div>
             </div>
 
             <div class="field">
               <label for="account-pass-confirm-input">Confirmar nova senha</label>
-              <input
-                id="account-pass-confirm-input"
-                type="password"
-                placeholder="Digite a senha novamente"
-                autocomplete="new-password"
-              />
+              <div class="account-password-field">
+                <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
+                <button type="button" class="account-pass-toggle" data-target="account-pass-confirm-input" aria-label="Mostrar senha">Mostrar</button>
+              </div>
             </div>
 
             <button class="btn-primary save-account-btn" id="save-account-btn" type="button">

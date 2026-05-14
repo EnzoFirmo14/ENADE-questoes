@@ -13,6 +13,8 @@
   font-family: var(--font-sans, 'Inter', sans-serif);
   user-select: none;
   max-width: 100%;
+  display: inline-block; /* Permite que o container respeite larguras menores se definido externamente */
+  vertical-align: middle;
 }
 
 
@@ -29,8 +31,8 @@
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
   line-height: var(--leading-normal);
-  color: var(--text);
-  background: var(--surface2);
+  color: var(--text-primary);
+  background: rgba(15, 23, 42, 0.7);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -42,8 +44,8 @@
 }
 
 .fc-custom-select .select-trigger:hover {
-  border-color: rgba(124, 110, 245, 0.45);
-  background: rgba(124, 110, 245, 0.06);
+  border-color: var(--primary-300);
+  background: rgba(99, 102, 241, 0.06);
   box-shadow: var(--shadow-sm);
 }
 
@@ -53,17 +55,17 @@
 
 /* Focus-visible for keyboard users */
 .fc-custom-select .select-trigger:focus-visible {
-  border-color: var(--accent);
-  background: rgba(124, 110, 245, 0.08);
-  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.18);
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
 }
 
 /* Open state */
 .fc-custom-select.open .select-trigger,
 .fc-custom-select .select-trigger[aria-expanded="true"] {
-  border-color: var(--accent);
-  background: rgba(124, 110, 245, 0.08);
-  box-shadow: 0 0 0 3px rgba(124, 110, 245, 0.18);
+  border-color: var(--primary);
+  background: rgba(99, 102, 241, 0.08);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -81,6 +83,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
+  min-width: 0; /* Essencial para flex-box não estourar */
 }
 
 /* ── Chevron Icon ── */
@@ -100,7 +103,7 @@
 .fc-custom-select.open .select-trigger .chevron,
 .fc-custom-select .select-trigger[aria-expanded="true"] .chevron {
   transform: rotate(180deg);
-  color: var(--accent);
+  color: var(--primary);
 }
 
 
@@ -116,11 +119,13 @@
   overflow-x: hidden;
   margin-top: 2px;
   padding: var(--space-2);
-  background: var(--surface);
-  border: 1.5px solid var(--accent);
+  background: #020617;
+  border: 1.5px solid var(--primary);
   border-top: none;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: var(--z-dropdown);
 
   /* Animation */
@@ -199,7 +204,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-2_5, 0.625rem) var(--space-4);
   font-size: var(--text-sm);
   color: var(--text);
   border-radius: var(--radius-md);
@@ -212,8 +219,8 @@
 }
 
 .fc-custom-select .select-option:hover {
-  background: rgba(124, 110, 245, 0.12);
-  color: var(--accent);
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--primary-light);
   transform: translateX(2px);
 }
 
@@ -230,8 +237,8 @@
 
 /* Selected option */
 .fc-custom-select .select-option.selected {
-  background: rgba(124, 110, 245, 0.16);
-  color: var(--accent);
+  background: rgba(99, 102, 241, 0.16);
+  color: var(--primary-light);
   font-weight: var(--font-semibold);
 }
 

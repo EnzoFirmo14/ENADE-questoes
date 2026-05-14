@@ -9,6 +9,7 @@ import {
 import { requireAuth } from '../core/auth-common.js';
 import { qs, toast } from '../core/ui.js';
 import { renderFlashcardsView } from '../views/flashcards.js';
+import { filterSectionsByCourse } from '../views/checklist.js';
 
 let userCtx = null;
 let curriculum = [];
@@ -77,7 +78,10 @@ function mountFlashcardsView(sectionIndex = 0, cardIndex = 0) {
   currentSectionIndex = sectionIndex;
   currentCardIndex = cardIndex;
 
-  renderFlashcardsView(curriculum, flashcards, {
+  // Filtrar currículo pelo curso do usuário
+  const filteredCurriculum = filterSectionsByCourse(curriculum, userCtx?.userDoc?.course || '');
+
+  renderFlashcardsView(filteredCurriculum, flashcards, {
     currentSectionId: sectionIndex,
     currentCardIndex: cardIndex,
     isAdmin: false,
@@ -107,6 +111,19 @@ async function init() {
     await loadCurriculum();
     await loadFlashcards();
     mountFlashcardsView(0, 0);
+
+    // Escutar mudanças de conta para atualizar em tempo real
+    document.addEventListener('account-data-saved', async (e) => {
+      const { course, name } = e.detail;
+      if (userCtx && userCtx.userDoc) {
+        userCtx.userDoc.course = course;
+        userCtx.userDoc.name = name;
+      }
+      
+      // Recarregar currículo e re-renderizar flashcards
+      await loadCurriculum();
+      mountFlashcardsView(0, 0);
+    });
   } catch (err) {
     console.error('[flashcards-page] erro na inicialização', err);
     toast('Erro ao carregar flashcards.', false);

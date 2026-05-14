@@ -144,6 +144,7 @@ export function renderAdmin(adminSections, handlers) {
   cont.querySelectorAll('.admin-sec-head').forEach(el => {
     el.addEventListener('click', e => {
       if (e.target.closest('.prio-select'))          return;
+      if (e.target.closest('.fc-custom-select'))     return; // Novo guard para select customizado
       if (e.target.closest('[data-remove-section]')) return;
       if (e.target.closest('[data-courses-toggle]')) return;
       handlers.toggleAdminSec(Number(el.dataset.head));

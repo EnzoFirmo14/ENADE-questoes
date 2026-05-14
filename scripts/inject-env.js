@@ -7,7 +7,7 @@ const dotenv = require('dotenv');
 
 const rootDir = path.join(__dirname, '..');
 const envPath = path.join(rootDir, '.env');
-const outDir = path.join(rootDir, 'public', 'js');
+const outDir = path.join(rootDir, 'public', 'js', 'core');
 const outFile = path.join(outDir, 'env.js');
 
 // Carrega o .env
@@ -24,8 +24,7 @@ const ENV = {
   VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID || '',
   VITE_FIREBASE_STORAGE_BUCKET: process.env.VITE_FIREBASE_STORAGE_BUCKET || '',
   VITE_FIREBASE_MESSAGING_SENDER_ID: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID || '',
-  VITE_ADMIN_EMAILS: process.env.VITE_ADMIN_EMAILS || ''
+  VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID || ''
 };
 
 if (!fs.existsSync(outDir)) {

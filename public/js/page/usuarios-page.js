@@ -8,10 +8,12 @@ import {
   doc,
   getDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  sendPasswordResetEmail
 } from '../core/firebase.js';
 import { requireAuth } from '../core/auth-common.js';
-import { qs, toast } from '../core/ui.js';
+import { qs, toast, customConfirm, customPrompt, openModal, closeModal } from '../core/ui.js';
+import { enhanceNativeSelect } from '../components/customSelect.js';
 import { totalItems } from '../views/checklist.js';
 import { renderUsersList } from '../views/users.js';
 
@@ -81,32 +83,67 @@ async function onEditUser(uid) {
     }
     const data = snap.data();
 
-    const newName = prompt('Nome:', data.name || '');
-    if (newName === null) return;
+    // Preencher campos do modal
+    const nameInput = qs('edit-user-name');
+    const courseSelect = qs('edit-user-course');
+    const isAdminCheck = qs('edit-user-is-admin');
+    
+    if (nameInput) nameInput.value = data.name || '';
+    if (courseSelect) {
+      courseSelect.value = data.course || '';
+      // Aplicar estilo customizado se ainda não tiver
+      enhanceNativeSelect(courseSelect);
+    }
+    if (isAdminCheck) isAdminCheck.checked = !!data.isAdmin;
 
-    const newCourse = prompt('Curso:', data.course || '');
-    if (newCourse === null) return;
+    openModal('modal-edit-user');
 
-    const newIsAdmin = confirm('É administrador? OK = Sim, Cancelar = Não');
-    const newDisabled = confirm('Desativar usuário? OK = Sim, Cancelar = Não');
+    // Botão Reset Senha
+    const resetBtn = qs('btn-reset-pass');
+    resetBtn.onclick = async () => {
+      if (await customConfirm('Resetar Senha', `Deseja enviar um e-mail de redefinição para ${data.email}?`)) {
+        try {
+          await sendPasswordResetEmail(auth, data.email);
+          toast('E-mail de redefinição enviado!', true);
+        } catch (err) {
+          console.error('[usuarios] reset error', err);
+          toast('Erro ao enviar e-mail de redefinição.', false);
+        }
+      }
+    };
 
-    await updateDoc(userRef, {
-      name: newName.trim() || data.name,
-      course: newCourse.trim(),
-      isAdmin: newIsAdmin,
-      disabled: newDisabled
-    });
+    // Botões rodapé
+    qs('edit-user-cancel').onclick = () => closeModal('modal-edit-user');
+    
+    qs('edit-user-save').onclick = async () => {
+      const newName = nameInput.value.trim();
+      const newCourse = courseSelect.value;
+      const newIsAdmin = isAdminCheck.checked;
 
-    toast('Usuário atualizado com sucesso.', true);
-    await loadUsersView();
+      if (!newName) {
+        toast('O nome não pode estar vazio.', false);
+        return;
+      }
+
+      await updateDoc(userRef, {
+        name: newName,
+        course: newCourse,
+        isAdmin: newIsAdmin
+      });
+
+      closeModal('modal-edit-user');
+      toast('Usuário atualizado com sucesso.', true);
+      await loadUsersView();
+    };
+
   } catch (e) {
-    console.error('[usuarios] erro ao editar usuário', e);
-    toast('Erro ao editar usuário.', false);
+    console.error('[usuarios] erro ao abrir edição', e);
+    toast('Erro ao carregar dados do usuário.', false);
   }
 }
 
 async function onRemoveUser(uid) {
-  if (!confirm('Tem certeza que deseja remover este usuário? Esta ação não pode ser desfeita.')) {
+  if (!(await customConfirm('Remover Usuário', 'Tem certeza que deseja remover este usuário? Esta ação não pode ser desfeita.'))) {
     return;
   }
   try {
@@ -133,6 +170,11 @@ async function init() {
   }
 
   await loadUsersView();
+
+  // Recarregar lista de usuários quando dados da conta forem atualizados
+  document.addEventListener('account-data-saved', () => {
+    loadUsersView();
+  });
 }
 
 init();

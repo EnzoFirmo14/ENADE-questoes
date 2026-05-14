@@ -2,11 +2,9 @@
 
 const __ENV = (typeof window !== 'undefined' && window.__ENV__) ? window.__ENV__ : {};
 
-// Admin emails
-export const ADMIN_EMAILS = (__ENV.VITE_ADMIN_EMAILS || '')
-  .split(',')
-  .map(e => e.trim())
-  .filter(Boolean);
+// Admin settings
+// Note: Admin status is now handled exclusively via Firestore user document fields
+// for enhanced security. Use the Firebase Console to manage admin status.
 
 // Category colors
 export const CATEGORY_COLORS = [

@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Função auxiliar para verificar se o usuário é admin
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Regras para a coleção de usuários
+    match /users/{userId} {
+      // O usuário pode ler seu próprio perfil ou um admin pode ler todos
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
+      // Apenas o próprio usuário pode editar seu nome/curso, mas NUNCA pode mudar seu próprio 'isAdmin'
+      // Admins podem editar qualquer campo de qualquer usuário
+      allow write: if request.auth != null && (
+        (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'email'])) || 
+        isAdmin()
+      );
+    }
+
+    // Regras para o Currículo/Checklist
+    match /curriculum/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Regras para Flashcards
+    match /flashcards/{cardId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+    
+    // Regras para Itens do Checklist (se houver coleção separada)
+    match /checklist_items/{itemId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+  }
+}

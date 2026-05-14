@@ -11,14 +11,16 @@ import {
 } from '../core/firebase.js';
 import { requireAuth } from '../core/auth-common.js';
 import { qs, toast, loader, setAdminUI } from '../core/ui.js';
-
+import { enhanceNativeSelect } from './customSelect.js';
 let currentUser = null;
 let userDoc = null;
 let dropdownOpen = false;
 
 function openDropdown(trigger, dropdown) {
   dropdownOpen = true;
-  dropdown.classList.add('open');
+  // A classe 'open' deve ser no .account-menu (pai) para o CSS funcionar
+  const menu = trigger.closest('.account-menu');
+  if (menu) menu.classList.add('open');
   trigger.setAttribute('aria-expanded', 'true');
   // Focus first input for a11y
   const firstInput = dropdown.querySelector('input:not([readonly]), select');
@@ -27,7 +29,8 @@ function openDropdown(trigger, dropdown) {
 
 function closeDropdown(trigger, dropdown) {
   dropdownOpen = false;
-  dropdown.classList.remove('open');
+  const menu = trigger.closest('.account-menu');
+  if (menu) menu.classList.remove('open');
   trigger.setAttribute('aria-expanded', 'false');
   trigger.focus();
 }
@@ -106,6 +109,31 @@ function bindAccountMenuEvents() {
       window.location.href = './index.html';
     });
   }
+
+  // Password visibility toggles
+  document.querySelectorAll('.account-pass-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Ocultar';
+        btn.setAttribute('aria-label', 'Ocultar senha');
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Mostrar';
+        btn.setAttribute('aria-label', 'Mostrar senha');
+      }
+    });
+  });
+
+  // Melhorar seletor de curso (True Premium)
+  const courseSelect = qs('account-course');
+  if (courseSelect && courseSelect.getAttribute('data-enhanced') !== 'true') {
+    enhanceNativeSelect(courseSelect);
+  }
 }
 
 async function saveAccountData() {
@@ -177,6 +205,11 @@ async function saveAccountData() {
     if (qs('account-pass-confirm-input')) qs('account-pass-confirm-input').value = '';
 
     toast('Dados atualizados com sucesso!', true);
+
+    // Notificar outras partes da app (ex: lista de usuários) que houve mudança
+    document.dispatchEvent(new CustomEvent('account-data-saved', {
+      detail: { uid: currentUser.uid, name: newName, course: newCourse }
+    }));
   } catch (e) {
     const msg =
       e.code === 'auth/requires-recent-login'

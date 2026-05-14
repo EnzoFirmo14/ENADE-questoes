@@ -558,3 +558,47 @@
     transition: none;
   }
 }
+
+/* ── Admin Compact Mode ── */
+.admin-fc-compact .fc-layout {
+  gap: var(--space-4);
+}
+
+.admin-fc-compact .fc-header {
+  margin-bottom: var(--space-4);
+}
+
+.admin-fc-compact .fc-header h2 {
+  font-size: var(--text-lg);
+}
+
+.admin-fc-compact .fc-field label {
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-1);
+}
+
+.admin-fc-compact .fc-field textarea {
+  min-height: 80px;
+  padding: var(--space-2);
+}
+
+.admin-fc-compact .fc-review {
+  padding: var(--space-4);
+}
+
+.admin-fc-compact .fc-card-wrapper {
+  height: 160px;
+  margin-bottom: var(--space-4);
+}
+
+.admin-fc-compact .fc-text {
+  font-size: var(--text-sm);
+}
+
+.admin-fc-compact .fc-review-header {
+  margin-bottom: var(--space-3);
+}
+
+.admin-fc-compact .fc-section-name {
+  font-size: var(--text-sm);
+}

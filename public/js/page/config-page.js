@@ -11,7 +11,7 @@ import {
   deleteDoc
 } from '../core/firebase.js';
 import { requireAuth } from '../core/auth-common.js';
-import { qs, toast } from '../core/ui.js';
+import { qs, toast, customConfirm, customPrompt } from '../core/ui.js';
 import {
   renderAdmin,
   renderAdminItems,
@@ -19,6 +19,7 @@ import {
   nextCategoryColor
 } from '../views/admin.js';
 import { renderFlashcardsView } from '../views/flashcards.js';
+import { enhanceNativeSelect } from '../components/customSelect.js';
 
 let userCtx             = null;
 let adminSections       = [];
@@ -128,6 +129,11 @@ function renderAdminView() {
     onDragEnd
   });
 
+  // Melhora todos os selects de prioridade
+  document.querySelectorAll('.prio-select').forEach(sel => {
+    enhanceNativeSelect(sel);
+  });
+
   restoreState();
 }
 
@@ -165,9 +171,9 @@ function addCategory() {
   toast('Categoria criada. Agora adicione os assuntos.');
 }
 
-function removeSection(e, si) {
+async function removeSection(e, si) {
   e.stopPropagation();
-  if (!confirm(`Remover categoria "${adminSections[si].cat}"?`)) return;
+  if (!(await customConfirm('Remover Categoria', `Deseja remover a categoria "${adminSections[si].cat}"?`))) return;
   adminSections.splice(si, 1);
   renderAdminView();
 }
@@ -189,8 +195,8 @@ function addItem(si) {
   setTimeout(() => qs(`new-item-${si}`)?.focus(), 0);
 }
 
-function editItem(si, ii) {
-  const txt = prompt('Editar:', adminSections[si].items[ii]);
+async function editItem(si, ii) {
+  const txt = await customPrompt('Editar Assunto', 'Assunto:', adminSections[si].items[ii]);
   if (txt === null || !txt.trim()) return;
   adminSections[si].items[ii] = txt.trim();
   renderAdminItems(adminSections, si, { editItem, removeItem });
@@ -328,4 +334,8 @@ export async function initConfigPage() {
   mountFlashcardsAdmin(0, 0);
 
   bindEvents();
+  const newCatPrio = qs('new-cat-prio');
+  if (newCatPrio) {
+    enhanceNativeSelect(newCatPrio);
+  }
 }

@@ -49,7 +49,7 @@ export function renderFlashcardsView(sections, cards, handlers) {
           <label for="fc-select-trigger">Matéria</label>
           <div class="fc-custom-select" id="fc-custom-select">
             <div
-              class="fc-select-trigger"
+              class="select-trigger"
               id="fc-select-trigger"
               role="button"
               tabindex="0"
@@ -57,17 +57,17 @@ export function renderFlashcardsView(sections, cards, handlers) {
               aria-expanded="false"
               aria-label="Selecionar matéria"
             >
-              <span class="fc-select-value" id="fc-select-value">${safeCat}</span>
-              <svg class="fc-select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none"
+              <span class="selected-text" id="fc-select-value">${safeCat}</span>
+              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
                 aria-hidden="true">
                 <polyline points="6 9 12 15 18 9"/>
               </svg>
             </div>
-            <ul class="fc-select-dropdown" id="fc-select-dropdown" role="listbox" aria-label="Matérias">
+            <ul class="select-dropdown" id="fc-select-dropdown" role="listbox" aria-label="Matérias">
               ${sections.map((sec, index) => `
                 <li
-                  class="fc-select-option${index === safeSectionIndex ? ' active' : ''}"
+                  class="select-option${index === safeSectionIndex ? ' selected' : ''}"
                   role="option"
                   aria-selected="${index === safeSectionIndex}"
                   data-value="${index}"
@@ -118,9 +118,6 @@ export function renderFlashcardsView(sections, cards, handlers) {
                 <div class="fc-face fc-face-back" id="fc-face-back">
                   <p class="fc-text">${safeAnswer}</p>
                   <span class="fc-label">Resposta</span>
-                </div>ss="fc-face fc-face-back" id="fc-face-back">
-                  <span class="fc-label">Resposta</span>
-                  <p>${safeAnswer}</p>
                 </div>
               </div>
             </div>
@@ -174,7 +171,7 @@ export function renderFlashcardsView(sections, cards, handlers) {
   const selectTrigger  = qs('fc-select-trigger');
   const selectValue    = qs('fc-select-value');
   const selectDropdown = qs('fc-select-dropdown');
-  const selectOptions  = selectDropdown ? [...selectDropdown.querySelectorAll('.fc-select-option')] : [];
+  const selectOptions  = selectDropdown ? [...selectDropdown.querySelectorAll('.select-option')] : [];
 
   function openSelect() {
     if (!customSelect || !selectTrigger) return;
@@ -206,10 +203,10 @@ export function renderFlashcardsView(sections, cards, handlers) {
     opt.addEventListener('click', () => {
       const newIndex = Number(opt.dataset.value);
       selectOptions.forEach(o => {
-        o.classList.remove('active');
+        o.classList.remove('selected');
         o.setAttribute('aria-selected', 'false');
       });
-      opt.classList.add('active');
+      opt.classList.add('selected');
       opt.setAttribute('aria-selected', 'true');
       if (selectValue) selectValue.textContent = opt.textContent.trim();
       closeSelect();

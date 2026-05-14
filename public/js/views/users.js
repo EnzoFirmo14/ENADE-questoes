@@ -48,8 +48,8 @@ export function renderUsersList(users, total, handlers = {}) {
           ${u.isAdmin ? 'Admin' : 'Aluno'}
         </span>
         <span class="user-prog">${done}/${total} (${pct}%)</span>
-        <button class="user-btn edit" data-edit-user="${escapeHtml(u.uid)}">Editar</button>
-        <button class="user-btn remove" data-remove-user="${escapeHtml(u.uid)}">Remover</button>
+        <button class="icon-btn edit" data-edit-user="${escapeHtml(u.uid)}" title="Editar usuário">✎</button>
+        <button class="icon-btn del" data-remove-user="${escapeHtml(u.uid)}" title="Remover usuário">✕</button>
       </div>
     `;
     cont.appendChild(row);

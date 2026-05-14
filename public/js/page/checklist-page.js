@@ -8,9 +8,8 @@ import {
   setDoc,
   updateDoc
 } from '../core/firebase.js';
-import { ADMIN_EMAILS } from '../core/constants.js';
 import { requireAuth } from '../core/auth-common.js';
-import { toast, loader, qs } from '../core/ui.js';
+import { toast, loader, qs, customConfirm } from '../core/ui.js';
 import {
   renderChecklist,
   filterSectionsByCourse, // re-exportada de checklist.js
@@ -89,7 +88,7 @@ async function onToggleItem(id, si) {
 }
  
 async function resetProgress() {
-  if (!confirm('Reiniciar todo o progresso?')) return;
+  if (!(await customConfirm('Reiniciar Progresso', 'Reiniciar todo o progresso?'))) return;
   progress = {};
   await saveProgress();
   renderChecklistView();
@@ -127,7 +126,7 @@ async function init() {
     data = {
       email:    user.email,
       name:     user.displayName || user.email.split('@')[0],
-      isAdmin:  ADMIN_EMAILS.includes(user.email),
+      isAdmin:  false, // Definido manualmente no Firebase Console por segurança
       course:   '',
       progress: {}
     };
@@ -145,6 +144,19 @@ async function init() {
  
   await loadCurriculum();
   renderChecklistView();
+
+  // Escutar mudanças de conta para atualizar em tempo real
+  document.addEventListener('account-data-saved', async (e) => {
+    const { course, name } = e.detail;
+    if (userDoc) {
+      userDoc.course = course;
+      userDoc.name = name;
+    }
+    
+    // Recarregar currículo (pode ter mudado com o curso) e re-renderizar
+    await loadCurriculum();
+    renderChecklistView();
+  });
 }
  
 // ============================================

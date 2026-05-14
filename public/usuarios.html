@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="ENADE Revisão - Gerenciamento de usuários" />
+    <meta name="description" content="ENADE Review - Gerenciamento de usuários" />
     <meta name="theme-color" content="#4f46e5" />
-    <title>ENADE Revisão - Usuários</title>
+    <title>ENADE Review - Usuários</title>
     <link rel="icon" type="image/png" href="./assets/Imagem Site Enade.png" />
     <link rel="stylesheet" href="./css/styles.css" />
   </head>
@@ -69,12 +69,18 @@
 
             <div class="field">
               <label for="account-pass-input">Nova senha</label>
-              <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
+              <div class="account-password-field">
+                <input id="account-pass-input" type="password" placeholder="Digite a nova senha" autocomplete="new-password" />
+                <button type="button" class="account-pass-toggle" data-target="account-pass-input" aria-label="Mostrar senha">Mostrar</button>
+              </div>
             </div>
 
             <div class="field">
               <label for="account-pass-confirm-input">Confirmar nova senha</label>
-              <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
+              <div class="account-password-field">
+                <input id="account-pass-confirm-input" type="password" placeholder="Digite a senha novamente" autocomplete="new-password" />
+                <button type="button" class="account-pass-toggle" data-target="account-pass-confirm-input" aria-label="Mostrar senha">Mostrar</button>
+              </div>
             </div>
 
             <button class="btn-primary save-account-btn" id="save-account-btn" type="button">
@@ -129,6 +135,52 @@
         </section>
       </div>
     </main>
+
+    <!-- Modal Editar Usuário -->
+    <div id="modal-edit-user" class="modal-overlay" style="display: none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Editar aluno</h3>
+          <p class="modal-subtitle">Atualize o nome e o curso do aluno.</p>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="edit-user-name">NOME</label>
+            <input type="text" id="edit-user-name" class="form-input" placeholder="Nome do aluno" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">CURSO</label>
+            <select id="edit-user-course" class="select-like">
+              <option value="">Sem curso</option>
+              <option value="ADS">Análise e Desenvolvimento de Sistemas</option>
+              <option value="SI">Sistemas de Informação</option>
+              <option value="EC">Engenharia da Computação</option>
+            </select>
+          </div>
+
+          <div class="admin-toggle-card">
+            <label class="pill-check">
+              <input type="checkbox" id="edit-user-is-admin" />
+              <div class="pill-check-content">
+                <strong>TORNAR ADMINISTRADOR</strong>
+                <span>Permite que este usuário edite categorias, itens e gerencie outros usuários.</span>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-group" style="margin-top: var(--space-6);">
+            <button type="button" class="btn-danger-outline" id="btn-reset-pass" style="width: 100%;">
+              📧 Enviar e-mail de redefinição de senha
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="edit-user-cancel">Cancelar</button>
+          <button class="btn btn-primary" id="edit-user-save">Salvar</button>
+        </div>
+      </div>
+    </div>
 
     <script src="./js/core/env.js"></script>
     <script type="module">
