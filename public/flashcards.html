@@ -22,7 +22,7 @@
       <div class="spinner spinner-lg" aria-label="Carregando"></div>
     </div>
     <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true">
-      <div class="toast toast-info" id="toast" role="alert"></div>
+      
     </div>
 
     <nav class="topnav" role="navigation" aria-label="Navegação principal">
@@ -110,8 +110,11 @@
       <div class="nav-links">
         <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
         <a class="nav-btn active" href="./flashcards.html" aria-current="page">🃏 Flashcards</a>
-        <a class="nav-btn" href="./configuracoes.html">⚙ Configurações</a>
-        <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
+
+        <!-- apenas admin -->
+        <a class="nav-btn" href="./configuracoes.html" data-admin-only>⚙ Configurações</a>
+        <a class="nav-btn" href="./usuarios.html" data-admin-only>👥 Usuários</a>
+
         <button class="nav-btn" id="logout-btn" type="button">Sair</button>
       </div>
     </nav>

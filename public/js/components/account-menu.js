@@ -10,7 +10,7 @@ import {
   updatePassword
 } from '../core/firebase.js';
 import { requireAuth } from '../core/auth-common.js';
-import { qs, toast, loader } from '../core/ui.js';
+import { qs, toast, loader, setAdminUI } from '../core/ui.js';
 
 let currentUser = null;
 let userDoc = null;
@@ -78,7 +78,9 @@ function bindAccountMenuEvents() {
   // Keyboard trap within dropdown when open
   dropdown.addEventListener('keydown', (e) => {
     if (e.key === 'Tab' && dropdownOpen) {
-      const focusable = dropdown.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const focusable = dropdown.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
 
@@ -199,16 +201,20 @@ async function initAccountMenu() {
   const snap = await getDoc(ref);
   if (!snap.exists()) {
     toast('Usuário não encontrado no banco de dados.', false);
+    setAdminUI(false);
     return;
   }
 
   userDoc = snap.data();
 
-  // Fill account fields
+  // Preencher campos da conta
   if (qs('nav-user-email')) qs('nav-user-email').textContent = userDoc.name || user.email;
   if (qs('account-email')) qs('account-email').value = userDoc.email || user.email;
   if (qs('account-name-input')) qs('account-name-input').value = userDoc.name || '';
   if (qs('account-course')) qs('account-course').value = userDoc.course || '';
+
+  // Ajustar UI de admin (nav-links com data-admin-only, etc.)
+  setAdminUI(!!userDoc.isAdmin);
 
   bindAccountMenuEvents();
 }

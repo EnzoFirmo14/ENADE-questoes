@@ -39,6 +39,7 @@
   background: var(--primary);
   color: var(--white);
   border-color: var(--primary);
+  border-radius: 10px;
 }
  
 .btn-primary:hover:not(:disabled) {

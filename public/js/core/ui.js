@@ -3,6 +3,7 @@
 export const qs = (id) => document.getElementById(id);
 export const qsa = (sel, parent = document) => [...parent.querySelectorAll(sel)];
 
+
 // ── Loader ──
 export function loader(show) {
   const el = qs('loader');
@@ -15,6 +16,7 @@ export function loader(show) {
     el.setAttribute('aria-hidden', 'true');
   }
 }
+
 
 // ── Toast Notifications ──
 let toastTimer = null;
@@ -38,6 +40,7 @@ export function toast(msg, ok = false) {
   }, 3500);
 }
 
+
 // ── Error Display ──
 export function showErr(msg, targetId = 'auth-err') {
   const errBox = qs(targetId);
@@ -56,6 +59,7 @@ export function clearErr(targetId = 'auth-err') {
   errBox.classList.remove('show');
 }
 
+
 // ── Debounce ──
 export function debounce(fn, delay = 300) {
   let timer;
@@ -64,6 +68,7 @@ export function debounce(fn, delay = 300) {
     timer = setTimeout(() => fn(...args), delay);
   };
 }
+
 
 // ── Throttle ──
 export function throttle(fn, limit = 100) {
@@ -77,6 +82,7 @@ export function throttle(fn, limit = 100) {
   };
 }
 
+
 // ── Escape HTML (XSS prevention) ──
 export function escapeHtml(str) {
   if (typeof str !== 'string') return str;
@@ -85,11 +91,13 @@ export function escapeHtml(str) {
   return div.innerHTML;
 }
 
+
 // ── Safe Text Insertion ──
 export function setText(el, text) {
   if (typeof el === 'string') el = qs(el);
   if (el) el.textContent = text;
 }
+
 
 // ── Toggle Element Visibility ──
 export function toggle(el, show) {
@@ -104,7 +112,19 @@ export function toggle(el, show) {
   }
 }
 
+
 // ── Confirm Dialog ──
 export function confirmAction(message) {
   return confirm(message);
+}
+
+
+// ── Admin UI (mostrar/esconder coisas só de admin) ──
+export function setAdminUI(isAdmin) {
+  // console.log('[setAdminUI] isAdmin =', isAdmin); // use se quiser debugar
+
+  // Qualquer elemento marcado com data-admin-only só aparece para admin
+  qsa('[data-admin-only]').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
 }

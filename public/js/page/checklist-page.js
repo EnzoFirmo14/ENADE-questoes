@@ -11,92 +11,83 @@ import {
 import { ADMIN_EMAILS } from '../core/constants.js';
 import { requireAuth } from '../core/auth-common.js';
 import { toast, loader, qs } from '../core/ui.js';
-import { renderChecklist, syncChecklistItem } from '../views/checklist.js';
-
-let currentUser = null;
-let userDoc     = null;
-let curriculum  = [];
-let progress    = {};
-
-// Cache da última lista filtrada, para manter índice sincrônico
-let filteredSections = [];
-
+import {
+  renderChecklist,
+  filterSectionsByCourse, // re-exportada de checklist.js
+  syncChecklistItem
+} from '../views/checklist.js';
+ 
+let currentUser      = null;
+let userDoc          = null;
+let curriculum       = [];
+let progress         = {};
+let filteredSections = []; // cache da última listagem filtrada
+ 
 // ============================================
 // CURRÍCULO
 // ============================================
-
+ 
 async function loadCurriculum() {
   const ref  = doc(db, 'curriculum', 'main');
   const snap = await getDoc(ref);
-
+ 
   if (snap.exists()) {
     curriculum = snap.data().sections || [];
   } else {
     curriculum = [];
     await setDoc(ref, { sections: [] });
   }
-
+ 
+  // Garante que toda seção tenha o array de cursos
   curriculum.forEach(sec => {
-    if (!Array.isArray(sec.courses)) {
-      sec.courses = [];
-    }
+    if (!Array.isArray(sec.courses)) sec.courses = [];
   });
 }
-
+ 
 // ============================================
 // PROGRESSO
 // ============================================
-
+ 
 async function saveProgress() {
   if (!currentUser) return;
   await updateDoc(doc(db, 'users', currentUser.uid), { progress });
 }
-
-// Calcula quais seções o usuário deve ver
-function getFilteredSections() {
-  if (!userDoc || !userDoc.course) {
-    // enquanto não tiver curso, mostra tudo (se quiser esconder, retorne [])
-    return curriculum;
-  }
-
-  // normaliza o identificador de curso
-  // se o userDoc.course for "ADS" e a seção tiver
-  // "ADS (Análise e Desenvolvimento de Sistemas)",
-  // ambos viram "ADS"
-  const courseId = String(userDoc.course).split(' ')[0]; // ex: 'ADS', 'SI', 'EC'
-
-  return curriculum.filter(sec => {
-    const listRaw = Array.isArray(sec.courses) ? sec.courses : [];
-
-    // normaliza cada item de courses da seção
-    const list = listRaw.map(v => String(v).split(' ')[0]); // ['ADS', '__ALL__', ...]
-
-    if (list.includes('__ALL__')) return true;
-    if (list.length === 0)        return false;
-
-    return list.includes(courseId);
-  });
-}
-
+ 
+// ============================================
+// RENDERIZAÇÃO
+// ============================================
+ 
+/**
+ * Calcula as seções visíveis para o curso do usuário e renderiza.
+ * A filtragem é feita UMA única vez aqui, usando filterSectionsByCourse
+ * de checklist.js (com normalização de curso consistente).
+ */
 function renderChecklistView() {
-  filteredSections = getFilteredSections();
-  renderChecklist(filteredSections, progress, toggleItem);
+  // userDoc.course pode ser "ADS", "SI" ou "EC"
+  // filterSectionsByCourse lida com a normalização internamente
+  filteredSections = filterSectionsByCourse(
+    curriculum,
+    userDoc?.course || ''
+  );
+ 
+  // Passa as seções já filtradas; renderChecklist NÃO filtra novamente
+  renderChecklist(filteredSections, progress, onToggleItem);
 }
-
-async function toggleItem(id, si) {
-  // si agora é índice dentro de filteredSections
-  progress[id] = !progress[id];
-
-  // garante que filteredSections esteja em sincronia
-  if (!filteredSections.length) {
-    filteredSections = getFilteredSections();
-  }
-
-  syncChecklistItem(filteredSections, progress, id, si);
+ 
+/**
+ * Callback chamado pelo renderChecklist quando o usuário clica num item.
+ *
+ * IMPORTANTE: não re-renderiza o checklist inteiro — o renderChecklist já
+ * aplicou a atualização otimista no DOM. Aqui só persistimos no Firestore.
+ *
+ * @param {string} id  Chave do item no objeto progress (ex: "0-3")
+ * @param {number} si  Índice da seção dentro de filteredSections
+ */
+async function onToggleItem(id, si) {
+  // progress[id] já foi atualizado otimistamente pelo renderChecklist
   await saveProgress();
-  renderChecklistView();
 }
-
+ 
 async function resetProgress() {
   if (!confirm('Reiniciar todo o progresso?')) return;
   progress = {};
@@ -104,62 +95,69 @@ async function resetProgress() {
   renderChecklistView();
   toast('Progresso reiniciado', true);
 }
-
+ 
 // ============================================
-// BIND E INIT INTERNO
+// EVENTOS
 // ============================================
-
+ 
 function bindEvents() {
   qs('reset-progress-btn')?.addEventListener('click', resetProgress);
-
+ 
   qs('logout-btn')?.addEventListener('click', async () => {
-    await signOut(auth);
+    try { await signOut(auth); } catch (_) { /* silencioso */ }
     window.location.href = './index.html';
   });
 }
-
+ 
+// ============================================
+// INIT
+// ============================================
+ 
 async function init() {
   bindEvents();
-
+ 
   const { user } = await requireAuth();
   currentUser = user;
-
+ 
   const ref  = doc(db, 'users', user.uid);
   const snap = await getDoc(ref);
   let data;
-
+ 
   if (!snap.exists()) {
     data = {
-      email:  user.email,
-      name:   user.displayName || user.email.split('@')[0],
-      isAdmin: ADMIN_EMAILS.includes(user.email),
-      course: '',
+      email:    user.email,
+      name:     user.displayName || user.email.split('@')[0],
+      isAdmin:  ADMIN_EMAILS.includes(user.email),
+      course:   '',
       progress: {}
     };
     await setDoc(ref, data);
   } else {
     data = snap.data();
   }
-
+ 
   userDoc  = data;
   progress = data.progress || {};
-
+ 
   if (qs('nav-user-email')) {
     qs('nav-user-email').textContent = data.name || user.email;
   }
-
+ 
   await loadCurriculum();
   renderChecklistView();
 }
-
+ 
 // ============================================
-// INIT EXPORTADO PARA O HTML
+// EXPORT
 // ============================================
-
+ 
 export async function initChecklistPage() {
   loader(true);
   try {
     await init();
+  } catch (err) {
+    console.error('[checklist-page] erro na inicialização', err);
+    toast('Erro ao carregar o checklist. Tente recarregar a página.', false);
   } finally {
     loader(false);
   }

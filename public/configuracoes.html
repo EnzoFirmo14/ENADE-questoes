@@ -16,7 +16,6 @@
       <div class="spinner spinner-lg" aria-label="Carregando"></div>
     </div>
     <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true">
-      <div class="toast toast-info" id="toast" role="alert"></div>
     </div>
 
     <nav class="topnav" role="navigation" aria-label="Navegação principal">
@@ -88,8 +87,24 @@
       <div class="nav-links">
         <a class="nav-btn" href="./checklist.html">📋 Checklist</a>
         <a class="nav-btn" href="./flashcards.html">🃏 Flashcards</a>
-        <a class="nav-btn active" href="./configuracoes.html" aria-current="page">⚙ Configurações</a>
-        <a class="nav-btn" href="./usuarios.html">👥 Usuários</a>
+
+        <!-- apenas admin -->
+        <a
+          class="nav-btn active"
+          href="./configuracoes.html"
+          aria-current="page"
+          data-admin-only
+        >
+          ⚙ Configurações
+        </a>
+        <a
+          class="nav-btn"
+          href="./usuarios.html"
+          data-admin-only
+        >
+          👥 Usuários
+        </a>
+
         <button class="nav-btn" id="logout-btn" type="button">Sair</button>
       </div>
     </nav>
@@ -135,7 +150,7 @@
       (async () => {
         try {
           loader(true);
-          await initAccountMenu();
+          await initAccountMenu();   // aqui dentro você chama setAdminUI(isAdmin)
           await initConfigPage();
         } catch (err) {
           console.error('[configuracoes] erro na inicialização', err);

@@ -50,8 +50,8 @@ function bindAuthUI() {
     if (!passInput) return;
     const isPassword = passInput.type === 'password';
     passInput.type = isPassword ? 'text' : 'password';
-    togglePassBtn.textContent = isPassword ? '🙈' : '👁️';
-    togglePassBtn.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+    togglePassBtn.textContent = isPassword ? 'Ocultar' : 'Mostrar';
+    togglePassBtn.setAttribute('aria-label', isPassword ? 'Ocultar' : 'Mostrar');
   });
 
   // Clear errors on input
