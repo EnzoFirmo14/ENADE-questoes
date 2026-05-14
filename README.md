@@ -15,8 +15,11 @@ Aplicação web para acompanhamento de estudos para o ENADE, com checklist inter
 * ✅ Login e cadastro com Firebase Auth
 * 📊 Progresso individual salvo na nuvem
 * 🧠 Checklist organizado por categorias
-* ⚙️ Painel Admin para editar conteúdos
-* 👥 Visualização de alunos e progresso
+* 🃏 Flashcards interativos para estudo dinâmico
+* ⚙️ Painel Admin para editar conteúdos (disciplinas e categorias)
+* 👥 Visualização de alunos e progresso por curso
+* 👤 Menu de perfil do usuário (atualização de dados e senha)
+* 🎨 Interface moderna com Design System e totalmente responsiva
 * ☁️ Deploy com Firebase Hosting
 
 ---
@@ -41,9 +44,18 @@ Aplicação web para acompanhamento de estudos para o ENADE, com checklist inter
 
 ```bash
 /public
-  └── index.html
-firebase.json
-.firebaserc
+  ├── assets/         # Imagens e ícones
+  ├── css/            # Estilos e Design System
+  ├── js/             # Scripts modulares (core, pages, views, components)
+  ├── index.html      # Tela de Autenticação (Login/Cadastro)
+  ├── checklist.html  # Página do Checklist de Estudos
+  ├── flashcards.html # Página de Flashcards Interativos
+  ├── configuracoes.html # Painel de Administração
+  └── usuarios.html   # Visualização e Gestão de Usuários
+/scripts              # Scripts automatizados (ex: inject-env)
+firebase.json         # Configurações de deploy do Firebase
+firestore.rules       # Regras de segurança do banco de dados
+.firebaserc           # Configuração de projeto Firebase
 ```
 
 ---
