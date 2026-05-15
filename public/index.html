@@ -79,7 +79,10 @@
 
           <div class="form-group" id="confirm-pass-field" style="display:none">
             <label class="form-label" for="inp-pass-confirm">Confirmar senha</label>
-            <input class="form-input" id="inp-pass-confirm" type="password" placeholder="Digite novamente" autocomplete="new-password" aria-required="false" />
+            <div class="password-field">
+              <input class="form-input" id="inp-pass-confirm" type="password" placeholder="Digite novamente" autocomplete="new-password" aria-required="false" />
+              <button type="button" class="password-toggle" id="toggle-pass-confirm" aria-label="Mostrar senha">Mostrar</button>
+            </div>
           </div>
 
           <button class="btn btn-primary btn-lg btn-full" id="auth-btn" type="submit">

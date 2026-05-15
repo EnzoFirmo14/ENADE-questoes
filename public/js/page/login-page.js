@@ -19,6 +19,7 @@ function bindAuthUI() {
   const tabReg = qs('tab-reg');
   const form = qs('auth-form');
   const togglePassBtn = qs('toggle-pass');
+  const togglePassConfirmBtn = qs('toggle-pass-confirm');
 
   tabLogin?.addEventListener('click', () => {
     isRegisterMode = false;
@@ -28,6 +29,7 @@ function bindAuthUI() {
     tabReg?.setAttribute('aria-selected', 'false');
     updateAuthModeUI();
     clearErr();
+    qs('inp-email')?.focus();
   });
 
   tabReg?.addEventListener('click', () => {
@@ -38,7 +40,18 @@ function bindAuthUI() {
     tabLogin?.setAttribute('aria-selected', 'false');
     updateAuthModeUI();
     clearErr();
+    qs('inp-name')?.focus();
   });
+
+  const handleTabKeydown = (e, tabElement) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      tabElement.click();
+    }
+  };
+
+  tabLogin?.addEventListener('keydown', (e) => handleTabKeydown(e, tabLogin));
+  tabReg?.addEventListener('keydown', (e) => handleTabKeydown(e, tabReg));
 
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -53,6 +66,15 @@ function bindAuthUI() {
     passInput.type = isPassword ? 'text' : 'password';
     togglePassBtn.textContent = isPassword ? 'Ocultar' : 'Mostrar';
     togglePassBtn.setAttribute('aria-label', isPassword ? 'Ocultar' : 'Mostrar');
+  });
+
+  togglePassConfirmBtn?.addEventListener('click', () => {
+    const passInput = qs('inp-pass-confirm');
+    if (!passInput) return;
+    const isPassword = passInput.type === 'password';
+    passInput.type = isPassword ? 'text' : 'password';
+    togglePassConfirmBtn.textContent = isPassword ? 'Ocultar' : 'Mostrar';
+    togglePassConfirmBtn.setAttribute('aria-label', isPassword ? 'Ocultar' : 'Mostrar');
   });
 
   // Clear errors on input

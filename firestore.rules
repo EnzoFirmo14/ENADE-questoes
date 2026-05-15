@@ -13,12 +13,17 @@ service cloud.firestore {
       // O usuário pode ler seu próprio perfil ou um admin pode ler todos
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       
-      // Apenas o próprio usuário pode editar seu nome/curso, mas NUNCA pode mudar seu próprio 'isAdmin'
-      // Admins podem editar qualquer campo de qualquer usuário
-      allow write: if request.auth != null && (
+      // Criar: só se for o próprio e não for admin
+      allow create: if request.auth != null && request.auth.uid == userId && request.resource.data.isAdmin == false;
+      
+      // Atualizar: o próprio usuário pode, desde que não mude isAdmin e email. Admins podem tudo.
+      allow update: if request.auth != null && (
         (request.auth.uid == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['isAdmin', 'email'])) || 
         isAdmin()
       );
+      
+      // Deletar: apenas admins
+      allow delete: if request.auth != null && isAdmin();
     }
 
     // Regras para o Currículo/Checklist
